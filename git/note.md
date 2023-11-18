@@ -16,7 +16,7 @@
 
 ## Git工作流程图
 
-![image-20231117181532442](picture\image-20231117181532442.png)
+![image](image\image-20231117181532442.png)
 
 
 
@@ -40,7 +40,7 @@
 
 ## 基础操作指令
 
-![image-20231117182943591](picture\image-20231117182943591.png)
+![image](image\image-20231117182943591.png)
 
  
 
