@@ -2,20 +2,15 @@ package com.chenhuiying.hello;
 
 public class Test {
     public static void main(String[] args) {
-        A aobject = new A();
-        aobject.methodA(new InterA(){
+        A a = new A();
+        a.methodA(new InterA() {
             @Override
             public void show() {
                 System.out.println("我是没有名字的InterA的实现类");
             }
         });
-        InterA another =  new InterA() {
-            @Override
-            public void show() {
-                System.out.println("我是有名字的InterA的实现类");
-            }
-        };
-        aobject.methodA(another);
+        B b = new B();
+        b.show();
     }
 }
 
@@ -24,3 +19,11 @@ class A {
         a.show();
     }
 }
+
+class B implements InterA {
+    @Override
+    public void show() {
+        System.out.println("我是有名字的InterA的实现类");
+    }
+}
+
