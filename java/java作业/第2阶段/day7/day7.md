@@ -180,12 +180,59 @@
 
      
 
+<<<<<<< HEAD
 2. 
 
 3. 会报错。Person类里没有有参构造器，同时set是一个TreeSet类型的对象，所以需要声明比较器。将代码改成：
 
    ```
    
+=======
+2. Set集合中最终会有五个元素，因为Set中的元素是不重复的。
+
+3. 会报错。Person类里没有有参构造器，同时set是一个TreeSet类型的对象，所以需要声明比较器。将代码改成：
+
+   ```Java
+   import java.util.Set;
+   import java.util.TreeSet;
+   
+   
+   class Person implements Comparable<Person>{
+       private int idCard;
+       private String userName;
+       public  Person(int idCard, String userName){
+           this.idCard = idCard;
+           this.userName = userName;
+       }
+       @Override
+       public int compareTo(Person p) {
+           return p.idCard-this.idCard;
+       }
+   
+       @Override
+       public String toString() {
+           return "Person{" +
+                   "idCard=" + idCard +
+                   ", userName='" + userName + '\'' +
+                   '}';
+       }
+   
+   }
+   
+   public class Entry {
+       public static void main(String[] args) {
+           Set<Person> set = new TreeSet<>();
+           set.add(new Person(154, "zhaoliu"));
+           set.add(new Person(101, "zhangsan"));
+           set.add(new Person(101, "zhangsan"));
+           set.add(new Person(133, "wangwu"));
+           set.add(new Person(115, "zhangsan"));
+           set.add(new Person(115, "zhangsan"));
+           set.add(new Person(112, "lisi"));
+           System.out.println(set);
+       }
+   }
+>>>>>>> e14abec71800aac3edd045dea2a820fda157089a
    ```
 
    
