@@ -130,3 +130,67 @@ java-project
 |   test   |        |    Y     |      |    junit    |
 | provided |   Y    |    Y     |      | servlet-api |
 | runtime  |        |          |  Y   |    jdbc     |
+
+
+
+**依赖范围的传递性:**
+
+行表示直接依赖，列表示间接依赖
+
+|          | compile | test | provided | runtime |
+| -------- | ------- | ---- | -------- | ------- |
+| compile  | compile | test | provided | runtime |
+| test     |         |      |          |         |
+| provided |         |      |          |         |
+| runtime  | runtime | test | provided | runtime |
+
+
+
+
+
+## 生命周期
+
+插件与生命周期内的阶段绑定，在到对应的生命周期是执行对应的插件功能
+
+默认maven在各个生命周期上绑定有预设的功能
+
+通过插件可以自定义功能
+
+```xml
+<executions>
+	<execution>
+    	<goals>
+        	<goal>
+            
+            </goal>
+            <phase>
+            
+            </phase>
+        </goals>
+    </execution>
+</executions>
+```
+
+
+
+### clean
+
++ pre-clean：执行一些需要在clean之前完成的工作
++ clean：移除所有上一次构建生成的文件
++ post-clean：执行一些需要在clean之后完成的工作
+
+
+
+### default
+
+### site
+
++ pre-site：执行一些需要在生成站点文档之前完成的工作
++ site：生成项目的站点文档
++ post-site：执行一些需要在生成站点文档之后完成的工作，并且为部署做准备
++ site-deploy：将生成的站点文档部署到服务器上
+
+
+
+# 分模块开发与设计
+
