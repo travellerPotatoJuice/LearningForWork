@@ -1,5 +1,61 @@
 # Web入门
 
+## HTTP协议
+
+- Hyper Text Transfer Protocol, 超文本传输协议，规定了浏览器和服务器之间数据传输的规则
+- 特点：
+  - 基于TCP协议：面向连接，安全
+  - 基于请求-响应模型：一次请求对应一次响应
+  - HTTP协议是无状态的协议，对于事务处理没有记忆能力，每次请求-响应都是独立的
+
+
+
+### HTTP请求协议
+
+- 请求行（请求方式，资源路径，协议）
+- 请求头（key：value）
+  - **Host**：主机名
+  - **User-Agent**：浏览器版本
+  - **Accept**：浏览器可接收的资源类型
+  - **Accept-Language**：浏览器希望接收到的语言
+  - **Accept-Encoding**：浏览器可以支持的压缩类型
+  - **Content-Type**：请求主体的数据类型
+  - **Content-Length**：请求主体的大小
+- 请求体（GET请求没有请求体，POST请求参数在请求体中）
+
+
+
+### HTTP响应协议
+
+- 响应行（协议，状态码，描述）
+  - 响应状态码
+    - 1xx:响应中
+    - 2xx:成功
+    - 3xx:重定向
+    - 4xx:客户端错误
+    - 5xx:服务器错误
+  - 常见响应状态码
+    - 200 OK ：处理成功
+    - 302 Found
+    - 304 Not Modified：服务端未修改，可直接使用本地缓存
+    - 400 Bad Request：请求有语法错误
+    - 403 Forbidden：服务器拒绝提供服务
+    - 404 Not Found：请求资源不存在
+    - 405 Method Not Allowed：请求方式有误
+    - 428 Precondition Required：服务器要求有条件的请求  
+    - 429 Too Many Requests：请求太多
+    - 500 Internal Server Error：服务器发生不可预期的错误
+    - 503 Service Unabailable：服务器没有做好准备
+- 响应头（key：value）
+  - Content-Type：响应内容类型
+  - Content-Length：相应内容长度
+  - Content-Encoding：响应压缩算法
+  - Cache-Control：指示如何缓存
+  - Set-Cookie：告知浏览器设置Cookie
+- 响应体（存放响应数据）
+
+
+
 ## 请求响应
 
 前端控制器：DispatcherServlet

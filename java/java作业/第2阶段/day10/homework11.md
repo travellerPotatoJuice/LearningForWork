@@ -21,7 +21,6 @@
      + newSingleThreadExecutor()
      + newCachedThreadPool()
 
-
 ------
 
 #### 二、简答题：
@@ -121,8 +120,6 @@
 
 <font color=blue size=5>xml文件只能有一个根，而这里有两个</font>
 
-![image-20220108174449458](C:/Users/83538/Desktop/第二阶段：基础加强13天课程（资料）/全部作业/day10作业/作业11/image/image-20220108174449458.png)
-
 
 
 
@@ -132,8 +129,6 @@
 <font color=blue size=5>student的属性值书写错误，应当为id="1";  </font>
 
 <font color=blue size=5><gender>标签没有闭合 </font>
-
-![image-20220108173625775](C:/Users/83538/Desktop/第二阶段：基础加强13天课程（资料）/全部作业/day10作业/作业11/image/image-20220108173625775.png)
 
 
 

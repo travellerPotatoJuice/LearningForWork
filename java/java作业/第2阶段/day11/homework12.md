@@ -180,19 +180,65 @@ D．sleep
 
 ##### 排错题1：分析当执行如下程序的ThreadDemo01的main方法的时候，在控制台会输出什么内容？如果想一直输出"执行了======"应该对该程序如何改造【只允许对flag变量进行相关修改】？并且说明原因？
 
-![image-20211222180935477](C:/Users/83538/Desktop/第二阶段：基础加强13天课程（资料）/全部作业/day11作业/作业12/image/image-20211222180935477.png)
+```Java
+public class MyThread extends Thread{
 
-```tex
-答：
+    private boolean flag = false;
+    public boolean isFlag(){
+        return flag;
+    }
+
+    @Override
+    public void run(){
+        try{
+            Thread.sleep(1000);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        this.flag = true;
+        System.out.println("flag=" + flag);
+    }
+}
+
 ```
+
+```Java
+import java.util.*;
+
+public class Main{
+    public static void main(String[] args) {
+        MyThread myThread= new MyThread();
+        myThread.start();
+        while(true){
+            if(myThread.isFlag()){
+                System.out.println("执行了======");
+            }
+        }
+    }
+}
+```
+
+
+
+<font color=blue size=4>控制台会输出flag=true</font>
+
+<font color=blue size=4>因为在Java中，线程之间对共享变量的修改不一定会立即对其他线程可见。当flag的值被MyThread修改后，它会将值更新到线程的本地内存中，而不是写入主内存，所以主线程在读取flag的值时不一定能读到最新的值。因此就陷入了循环当中</font>
+
+<font color=blue size=4>只需要把MyThread中flag的初始值设置为true就可以了</font>
 
 ##### 排错题2：以下代码在控制台输出结果是什么？多运行几次试试？如果结果不是如你所愿，请试着猜一下原因~
 
-![image-20211222180935477](C:/Users/83538/Desktop/第二阶段：基础加强13天课程（资料）/全部作业/day11作业/作业12/image/Snipaste_2023-03-12_19-56-16.jpg)
+<font color=blue size=4>已经送了2个冰淇淋
+已经送了3个冰淇淋
+已经送了2个冰淇淋
+已经送了7个冰淇淋
+已经送了5个冰淇淋
+已经送了4个冰淇淋</font>
 
-```java
-答：
-```
+<font color=blue size=4>出现这样的结果是因为：</font>
+
++ <font color=blue size=4>创建的多个线程共享一个MyAtomThread对象，这些线程之间的运行是异步的。</font>
++ <font color=blue size=4>当线程A读取count的值时，线程B可能已经修改了count的值，并进行了输出，此时线程A仍然对旧的值进行操作，并进行输出。</font>
 
 #### 五、代码题：
 
