@@ -14,6 +14,8 @@ public class Solution5 {
         else{
             readContent(file);
         }
+//        File[] files = file.listFiles();
+//        Arrays.stream(files).filter(f -> f.length() < 200*1024).forEach(System.out::println);
     }
     public void findFile(File file){
         File[] files = file.listFiles();

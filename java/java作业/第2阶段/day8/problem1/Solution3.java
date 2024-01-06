@@ -17,5 +17,8 @@ public class Solution3 {
                 System.out.println(f.getName());
             }
         }
+
+//        String[] list = file.list();
+//        Arrays.stream(list).filter(name -> name.endsWith(".java")).forEach(System.out::println);
     }
 }
