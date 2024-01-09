@@ -2080,7 +2080,7 @@ List<String> list = name.stream().filter(s - > s.startsWith("张")).collect(Coll
 
 ## Stream流常见方法
 
-**获取Stream流：**
+**创建Stream流：**
 
 ```Java
 //获取集合的Stream流
@@ -2091,6 +2091,24 @@ public static <T> Stream<T> stream(T[] array)
 
 //获取当前接收数据的stream流
 public static <T> Stream<T> of(T...values) 
+```
+
+
+
+```Java
+//单列集合
+List<Author> authors = getAuthors();
+Stream<Author> stream = authors.stream();
+
+//数组
+Integer[] arr = {1,2,3,4,5};
+Stream<Integer> stream1 = Arrays.stream(arr);
+Stream<Integer> stream2 = Stream.of(arr);
+
+//双列集合
+Map<String, Integer> map = new HashMap<>();
+Stream<Map.Entry<String, Integer>> entrySet = map.entrySet();
+Stream<Map.Entry<String, Integer>> stream = entrySet.stream();
 ```
 
 

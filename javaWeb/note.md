@@ -203,3 +203,35 @@ public String jsonParam(@RequestBody User user){
 
 ## 分层解耦
 
+### 三层架构
+
++ **表示层(User Interface Layer)**：主要模式有MVC（Model-View-Controller)或MVVM（Model-View-ViewModel）。用于显示和接收用户输入的数据。
++ **逻辑层(Business Logic Layer)**：处理业务逻辑和规则
++ **数据访问层(Data Access Layer)：**负责数据库的访问
+
+
+
+### IOC&DI
+
+控制反转（Inversion Of Control)：对象创建的控制权由程序内部转移到外部
+
+依赖注入（Dependency Injection）：容器为应用程序提供运行时所依赖的资源
+
+Bean对象：IOC容器中创建，管理的对象
+
+
+
+### 相关注解
+
++ @Component：用于标识一个类是被Spring框架管理的组件。如果组件不能用以下三个注解标注，又需要被容器进行管理，则使用Component
+  + @Controller：标注控制器
+  + @Service：标志业务类
+  + @Repository：标注数据访问类
+
++ @ComponentScan：用于告诉Spring容器要扫描的包路径，Spring会自动扫描该包和其子包下的所有类。@SpringBootApplication中包含ComponentScan
+
++ @Autowired：用于实现自动装配，容器会自动查找匹配的Bean，将其注入到目标对象中
+  + @Autowired+@Primary：用于设置优先级
+  + @Autowire+@Qualifier：用于指定注入bean的名称，如果声明bean的时候没给名字，默认是首字母小写的类名
++ @Resource：JDK提供的。用于指定要注入的bean的名字
+
