@@ -6,7 +6,7 @@
 
 2. 引入Mybatis相关依赖，配置Mybatis
 
-3. 使用@Select注解，将SQL语句写入Select中。使用@Mapper注解，让程序自动生成接口对应的Bean对象
+3. 使用（@Select，@Delete）等注解，将SQL语句写入注解中。使用@Mapper注解，让程序自动生成接口对应的Bean对象
 
    
 
@@ -83,4 +83,68 @@ Lombok是一个Java库，它通过注解的方式简化了Java的编写，可以
 
 
 ## 增加
+
+@Insert
+
+如果有多个参数，可以使用实体类将多个参数进行封装，在填写占位符时要使用实体类里的参数名而不是数据库中的字段名
+
+
+
+**主键返回**
+
+useGeneratedKeys = true：指明需要获取自动生成的主键值
+
+keyProperty：表示获取的主键会被封装到id属性中
+
+@Options(useGeneratedKeys=true，keyProperty = "id")
+
+
+
+## 更新
+
+@Update
+
+
+
+## 查询
+
+@Select
+
+**myBatis中的数据封装：**
+
++ 如果实体类的属性名与数据库中的字段名一致，myBatis会自动封装
++ 如果不一致，则不能自动封装
+
+
+
+解决方法：
+
++ 在SQL语句中给字段起别名，别名与实体类的属性名保持一致
+
++ 通过@Results，@Result注解手动映射封装
+
+  + ```
+    @Results({
+    	@Result(column="数据库字段",property="实体类属性名")
+    })
+    ```
+
++ 开启myBatis的驼峰命名自动映射开关。在application.properties里修改(数据库里的字段名必须用下划线分隔，实体类中的名称必须用驼峰命名)
+
+  + ```
+    mybatis.configuration.map-underscore-tp-camel-case=true
+    ```
+
+    
+
+## 条件查询
+
+模糊匹配的时候，不能使用'%#{name}%'这种写法，解决方法：
+
++ 直接用'%${name}%'（性能低，不安全，存在SQL注入的问题）
++ 使用concat函数对字符串进行拼接
+
+
+
+# XML映射文件
 
