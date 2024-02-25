@@ -1,0 +1,6 @@
+//查询所有老师老师对应的类型
+<select id='selectAll'>
+	select type,course from teacher 
+</select>
+
+//查询老师教授的课程

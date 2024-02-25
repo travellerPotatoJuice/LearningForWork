@@ -148,3 +148,38 @@ keyProperty：表示获取的主键会被封装到id属性中
 
 # XML映射文件
 
+如果需要完成的功能比较简单，可以直接用SQL注解实现。如果功能比较复杂，则考虑用XML映射文件实现。
+
+使用XML映射文件需要遵循以下规范：
+
++ XML文件的名称和Mapper接口名称一致（包名和文件名）
++ XML文件namespace属性的值应该与对应的Mapper全限定名一致（从包名一直到类名）
++ XML文件中SQL语句的id与MApper接口中的方法名一致
+
+## 动态SQL
+
+随着用户的输入或外部条件的变化而变化的SQL语句
+
++ <if>：用于判断条件是否成立，使用test属性进行条件判断
++ <where>：在子元素有内容的情况下会插入where字句，并且会自动去除子句开头的and或or
++ <set>：去除字段后多余的逗号
++ <foreach>：
+  + collection：遍历的集合
+  + item：遍历出的元素
+  + separator：分隔符
+  + open：遍历前拼接的SQL片段
+  + close：遍历后拼接的SQL片段
++ <sql>：用于抽取sql片段
++ <include>：引用被抽取的sql片段
+
+```xml
+<set>   
+    <if test="name!=null">
+    	name like concat('%',#{name},'%')
+	</if>
+    <if test="gender!=null">
+    	gender = #{gender}
+	</if>
+</set>
+```
+
