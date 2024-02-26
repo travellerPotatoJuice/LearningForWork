@@ -605,7 +605,7 @@ SpringMVC加载的bean对应的包均在com.xx.controller包内，如何避免�
 
 ## 参数传递
 
-```
+```Java
 //为web容器添加过滤器并指定字符集
 protect Filter[] getServletFilters() {
 	CharacterEncodingFilter filter = new CharacterEncodingFilter();
@@ -646,3 +646,47 @@ protect Filter[] getServletFilters() {
   ```
 
 + 集合参数：请求参数名与形参集合对象名相同且请求参数为多个，用@RequestParam绑定参数关系
+
+
+
+## REST风格
+
+**RESTful：**根据REST风格对资源进行访问
+
+### 参数获取
+
++ @RequestParam：用于从请求中获取查询参数，通常通过?key=value形式传递在URL中。
++ @RequestBody：用于从请求体中提取数据
++ @PathVariable：用于从URL路径中获取参数，通常用于RESTful风格的API，参数直接嵌入在URL路径中。
+
+```Java
+@RequestMapping(value="/users/{id},method = RequestMethod.DELETE")
+@ResponseBody
+public String delete(@PathVariable Integer id){
+    System.out.println("user delete..." +id);
+    return "{'module':'user delete'}";
+}
+```
+
+
+
+**应用：**
+
++ 发送请求参数超过一个时，以JSON格式为主
++ 如果发送非JSON格式数据，选用@RequestParam接收请求参数
++ 采用RESTful开发，当参数较少时使用@PathVariable
+
+
+
+### 简化注解
+
++ @RestController：@Controller + @ResponseBody。使用 @RestController注解的控制器类会自动将方法的返回值序列化为 JSON 或 XML 格式的数据，并将其直接写入 HTTP 响应体中。
++ @PostMapping：等价于@RequestMapping（method=RequestMethod.POST）
++ @DeleteMapping：等价于@RequestMapping（method=RequestMethod.DELETE）
++ @PutMapping：等价于@RequestMapping（method=RequestMethod.PUT）
++ @GetMapping：等价于@RequestMapping（method=RequestMethod.GET）
+
+
+
+
+
