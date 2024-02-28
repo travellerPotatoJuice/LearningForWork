@@ -237,23 +237,289 @@ Redis Hash是一种记录类型，其结构是field-value的集合。可以用Ha
 
 ## List类型
 
+Redis中的List和Java中的LinkedList类似，可以看作一个双向链表结构，既可以支持正向检索，也支持反向检索。常用于实现堆栈和队列，即存储一个有序数据。
 
+**特点：**
+
++ 有序
++ 元素可以重复
++ 插入和删除快
++ 查询速度一般
+
+
+
++ LPUSH：将所有指定值插入存储在 key 处的**列表头部**。如果 key 不存在，则在执行推送操作前将其创建为空列表。如果 key 保存的值不是list，则会返回错误信息。
+
+  ```
+  LPUSH key element [element ...]
+  ```
+
+  
+
++ RPUSH：将所有指定值插入存储在 key 处的**列表尾部**。如果 key 不存在，则在执行推送操作前将其创建为空列表。如果 key 保存的值不是 list，则会返回错误信息。
+
+  ```
+  RPUSH key element [element ...]
+  ```
+
+  
+
++ LPOP：删除并返回存储在 key 处的列表的第一个元素。默认情况下，该命令从列表开头取出一个元素。如果提供了可选的 count 参数，则根据列表的长度，返回至多count个元素（如果列表长度小于count，就只返回count个值），如果列表为空，返回nil
+
+  
+
++ ```
+  LPOP key [count]
+  ```
+
+  
+
++ RPOP：删除并返回存储在 key 处的列表的最后一个元素。默认情况下，该命令从列表末尾弹出一个元素。如果提供了可选的 count 参数，则根据列表的长度，返回至多count个元素（如果列表长度小于count，就只返回count个值），如果列表为空，返回nil
+
+  ```
+  RPOP key [count]
+  ```
+
+  
+
++ LRANGE：返回存储在 key 处从索引start到stop的指定元素。索引从0开始。
+
+  ```
+  LRANGE key start stop
+  ```
+
+  
+
++ BLPOP：BLPOP 是一种阻塞列表弹出原语。它是 LPOP 的阻塞版本，因为当没有元素从任何给定列表中弹出时，它会阻塞连接。从第一个非空列表的头部弹出一个元素，并按照给定键的顺序进行检查。
+
+  ```
+  BLPOP key [key ...] timeout
+  ```
+
+  
+
++ BRPOP：BRPOP 是一种阻塞列表弹出原语。它是 RPOP 的阻塞版本，因为当没有元素从任何给定列表中弹出时，它会阻塞连接。从第一个非空列表的头部弹出一个元素，并按照给定键的顺序进行检查。
+
+  ```
+  BRPOP key [key ...] timeout
+  ```
+
+  
+
+  
 
 
 
 ## Set类型
 
+Redis中的Set是由字符串组成的集合，其中的字符串是唯一且无序的。查找速度很快，支持交集、并集、差集等功能。
 
++ SADD：将指定的成员添加到存储在 key 处的集合中。已是此集合成员的指定成员将被忽略。如果 key 不存在，则会在添加指定成员前创建一个新集合。如果存储在 key 处的值不是一个集合，则会返回错误信息。
+
+  ```
+  SADD key member [member ...]
+  ```
+
++ SREM：从存储在 key 处的集合中移除指定的成员。不属于此集合的指定成员将被忽略。如果 key 不存在，则将其视为空集，此命令返回 0。如果 key 处存储的值不是一个集合，则会返回错误信息。
+
+  ```
+  SREM key member [member ...]
+  ```
+
++ SISMEMBER：返回成员是否是存储在 key 中的集合的成员。
+
+  ```
+  SISMEMBER key member
+  ```
+
++ SCARD：返回set中元素的个数
+
+  ```
+  SCARD key
+  ```
+
++ SMEMBERS：获取set中所有的元素
+
+  ```
+  SMEMBERS key
+  ```
+
++ SINTER：返回所有给定集合的交集
+
+  ```
+  SINTER key [key ...]
+  ```
+
++ SDIFF：返回第一个集合与所有连续集合的差集
+
+  ```
+  SDIFF key [key ...]
+  ```
+
++ SUNION：返回所有给定集合的并集
+
+  ```
+  SUNION key [key ...]
+  ```
 
 
 
 ## SortedSet类型
 
+Redis的SortedSet是一个可排序的set集合，其中每个元素都带有一个score属性，可以基于score属性对元素排序。底层的实现是一个跳表（SkipList）加一个hash表。具有可排序、元素、查询速度快的特点，常被用来实现排行榜这样的功能。
 
++ ZADD：添加一对或多对score-member到key所对应的sortedSet
 
+  ```
+  ZADD key [NX | XX] [GT | LT] [CH] [INCR] score member [score member
+    ...]
+  ```
 
+  + **XX**: 只更新已存在的元素。不要添加新元素。
+  + **NX**: 只添加新元素。不更新已存在的元素。
+  + **LT**: 对于已存在的元素，只有当新score小于当前score时才更新该元素
+  + **GT**:  对于已存在的元素，只有当新score大于当前score时才更新该元素
+  + **CH**: 将返回值从新增元素数修改为更改元素的总数（更改的元素是指**新添加的元素**和**分值已更新的已有元素**。因此，命令行中指定的元素如果得分与过去相同，则不计算在内）注意：通常 `ZADD` 的返回值只计算新增元素的数量。
+  + **INCR**: 指定该选项时，ZADD 的作用与 ZINCRBY 类似。在这种模式下，只能指定一对score-element。
+
++ ZREM：从存储在 key 处的排序集合中删除指定的成员。不存在的成员将被忽略。如果 key 存在，但不包含排序集合，则会返回错误信息。
+
+  ```
+  ZREM key member [member ...]
+  ```
+
++ ZSCORE：返回key所代表的sortedSet中member的score
+
+  ```
+  ZSCORE key member
+  ```
+
++ ZRANK：返回key所代表的sortedSet中member的排名。score从低到高进行排序，序号从0开始。withscore参数会在返回值中添加该元素的score
+
+  ```
+  ZRANK key member [WITHSCORE]
+  ```
+
++ ZCARD：获取sortedSet中元素的个数
+
+  ```
+  ZCARD key
+  ```
+
++ ZCOUNT：返回score在min到max之间的元素的个数
+
+  ```
+  ZCOUNT key min max
+  ```
+
++ ZINCRBY：让sortedSet中的member自增，增量为increment。如果member不存在于sortedSet中，则以increment作为其得分。如果 key 不存在，则会创建一个以member为唯一成员的新的sorted set。
+
+  ```
+  ZINCRBY key increment member
+  ```
+
++ ZRANGE：获取在start和stop之间的元素
+
+  ```
+  ZRANGE key start stop [BYSCORE | BYLEX] [REV] [LIMIT offset count]
+    [WITHSCORES]
+  ```
+
+  + **BYSCORE**：表示根据Score排序
+  + **BYLEX**：表示根据字典序排序
+  + **REV**: 反转排序，从高到低排序。score相同时采用反向词典排序
+  + **LIMIT offset count**：类似于 SQL 中的 SELECT LIMIT offset, count
+  + **WITHSCORES**：在命令回复中补充返回元素的分数
+
+   
 
 # Redis的Java客户端
 
++ Jedis：学习成本低，线程不安全
++ lettuce：基于Netty实现，支持同步异步和响应式编程，线程安全。支持Redis的哨兵模式，集群模式和管道模式
++ Redisson：基于Redis实现的分布式Java数据结构集合。包含了诸如Map，Queue，Lock，Semaphore等强大的功能
+
+
+
+## Jedis
+
+### 使用步骤
+
+1. 引入依赖
+2. 建立连接
+3. 使用Jedis，方法名与Redis一致
+4. 释放连接
+
+
+
+### Jedis线程连接池
+
+```Java
+public class JedisConnectionFactory{
+    private static final JedisPool jedisPool;
+    
+    static{
+        //配置连接池
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(8);
+        jedisPoolConfig.setMaxIdle(8);
+        jedisPoolConfig.setMinIdle(0);
+        jedisPoolConfig.setMaxWaitMillis(200);
+        //创建连接池对象
+        jedisPool = new JedisPool(jedisPoolConfig,"host","port",1000,"password");
+    }
+    //获取Jedis对象
+    public static Jedis getJedis(){
+        return jedisPool.getResource();
+    }
+}
+```
+
+
+
+## Spring Data Redis
+
+### 简介
+
+SpringData是Spring中数据操作的模块，包括对各种数据库的继承，其中对Redis的集成模块就叫做SpringDataRedis
+
++ 提供了对不同Redis客户端的整合（Jedis，Lettuce）
++ 提供了RedisTemplate统一API来操作Redis
++ 支持Redis的发布订阅模型
++ 支持Redis哨兵和Redis集群
++ 支持基于Lettuce的响应式编程
++ 支持基于JDK，JSON，字符串，Spring对象的数据序列化和反序列化
++ 支持Redis的JDKCollection实现
+
+
+
+SpringDataRedis中提供了RedisTemplate工具类，其中封装了各种对Redis的操作，并且将不同数据类型的操作API封装到了不同的类型中 
+
+
+| API                         | 返回值类型      | 说明                      |
+| --------------------------- | --------------- | ------------------------- |
+| redisTemplate.opsForValue() | valueOperations | 操作**String**类型数据    |
+| redisTemplate.opsForHash()  | HashOperations  | 操作**Hash**类型数据      |
+| redisTemplate.opsForList()  | ListOperations  | 操作**List**类型数据      |
+| redisTemplate.opsForSet()   | SetOperations   | 操作**Set**类型数据       |
+| redisTemplate.opsForZSet()  | ZSetOperations  | 操作**SortedSet**类型数据 |
+| redisTemplate               | s               | 通用命令                  |
+
+
+
+### 使用步骤
+
+1. 引入依赖
+
+   ```xml
+   <dependency>
+   	<groupId>org.springframework.boot</groupId>
+   	<artifactId>spring-boot-starter-data-redis</artifactId>
+   </dependency>
+   ```
+
+   
+
+2. 配置文件
 
 
