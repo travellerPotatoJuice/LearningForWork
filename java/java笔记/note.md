@@ -3221,3 +3221,164 @@ java.lang.reflect
 + 方法二：调用Class提供方法：public static Class forName(String package);
 + 方法三：Object提供的方法：public Class getClass()；Class c = 对象.getClass()
 
+
+
+### 获取构造函数
+
+```Java
+//获取全部public构造器
+Constructor<?>[] getConstructors()
+
+//获取全部构造器(无视权限修饰符)
+Constructor<?>[] getDeclaredConstructors()
+
+//获取某个public构造器
+Constructor<T> getConstructor(Class<?>... parameterTypes)
+
+//获取某个构造器(无视权限修饰符)
+Constructor<T> getDeclaredConstructor(Class<?>... parameterTypes)
+```
+
+### 获取成员变量
+
+```Java
+//获取全部public成员变量
+public Filed[] getFields()
+
+//获取全部成员变量(无视权限修饰符)
+public Filed[] getDeclaredFields()
+
+//获取某个public成员变量
+public Filed getField(String name)
+
+//获取某个成员变量(无视权限修饰符)
+public Filed getDeclaredField(String name)
+```
+
+```Java
+//赋值
+void set(Object obj, Object value);
+
+//取值
+Object get(Object obj);
+
+//设置为true时表示禁止检查访问权限（暴力反射
+public void setAccessible(boolean flag);
+```
+
+
+
+### 获取成员方法
+
+```Java
+//获取全部public成员方法
+public Method[] getMethods()
+
+//获取全部成员方法(无视权限修饰符)
+public Method[] getDeclaredMethods()
+
+//获取某个public成员方法
+public Method getMethod(String name, Class<?>...parameterTypes)
+
+//获取某个成员方法(无视权限修饰符)
+public Method getDeclaredMethod(String name,Class<?>...parameterTypes)
+```
+
+```Java
+//触发某个对象的该方法执行
+public Object invoke (Object obj, Object...args)
+
+//设置为true时表示禁止检查访问权限（暴力反射
+public void setAccessible(boolean flag)
+```
+
+
+
+## 注解
+
+###认识注解
+
+Annotation
+
+Java中的特殊标记，让其他程序可以根据注解信息来决定怎么执行该程序
+
+- 注解本质是一个继承了Annotation接口的接口
+- @注解（...）本质就是一个实现类对象
+
+```Java
+//自定义注解
+public @interface 注解名称{
+	public 属性类型 属性名() default 默认值;
+}
+
+
+//例子
+public @interface MyTest1{
+    String aaa();
+    boolean bbb();
+}
+//反编译后的结果
+public interface MyTest1 extends Annotation{
+    public abstract String aaa();
+    
+    public abstract boolean bbb();
+}
+
+```
+
+如果注解中只有一个value属性（或有多个其他属性，但都有默认值），则使用注解时，value名称可以不写
+
+
+
+### 元注解
+
+修饰注解的注解
+
++ @Target
+
+  + 声明被修饰的注解可以在哪些位置使用
+    + TYPE：类，接口
+    + FIELD：成员变量
+    + METHOD：成员方法
+    + PARAMETER：方法参数
+    + CONSTRUCTOR：构造器
+    + LOCAL_VARIABLE：局部变量
+  + 用法例：@Target（ElementType.TYPE)
+
+  
+
++ @Retention
+
+  + 声明注解的保留周期
+    + SOURCE：只作用在源码阶段，字节码文件中不存在
+    + CLASS（默认值）：保留到字节码文件阶段，运行阶段不存在
+    + RUNTIME（开发常用）：一直保留到运行阶段
+  + 用法例：@Retention（RetentionPolicy.RUNTIME）
+
+
+
+### 注解的解析
+
+**注解的解析：**判断类、方法、成员变量上是否存在注解，若存在则将内容解析出来
+
+**解析步骤**：
+
++ 要解析谁上面的注解，就要先获取到谁的对象
++ Class、Method、Field、Constructor都实现了Annotatedelement接口，它们都拥有解析注解的能力
+
+```Java
+//获取当前对象上的注解
+public Annotation[] getDeclaredAnnotations()
+
+//获取指定的注解对象
+public T getDeclaredAnnotation(Class<T> annotationClass)
+
+//判断当前对象上是否存在某个注解
+public boolean isAnnotationPresent(Class<Annotation> annotation)
+```
+
+
+
+
+
+## 动态代理
