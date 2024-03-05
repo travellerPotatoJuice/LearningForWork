@@ -603,7 +603,7 @@ SpringMVC加载的bean对应的包均在com.xx.controller包内，如何避免�
 
   
 
-## 参数传递
+## 请求参数传递
 
 ```Java
 //为web容器添加过滤器并指定字符集
@@ -614,9 +614,10 @@ protect Filter[] getServletFilters() {
 }
 ```
 
-+ 普通参数传参：地址参数名与形参变量名相同，可以直接接收
++ **普通参数**：
 
-+ 普通参数传参：地址参数名与形参变量名不相同，使用@RequestParam将请求参数绑定到方法参数上
+  + 地址参数名与形参变量名相同，可以直接接收
+  + 地址参数名与形参变量名不相同，使用@RequestParam将请求参数绑定到方法参数上
 
   ```Java
   //将请求参数name绑定给形参userName
@@ -625,7 +626,7 @@ protect Filter[] getServletFilters() {
   }
   ```
 
-+ POJO参数：请求参数名和实体类中的属性名一样时，会实现自动绑定
++ **POJO参数**：请求参数名和实体类中的属性名一样时，会实现自动绑定
 
   ```Java
   //请求参数为username，age；实体类User中的属性名为username，age
@@ -635,9 +636,9 @@ protect Filter[] getServletFilters() {
   }
   ```
 
-+ 嵌套POJO参数：请求参数按照对象层次结构关系提供参数
++ **嵌套POJO参数**：请求参数按照对象层次结构关系提供参数
 
-+ 数组参数：请求参数名与形参对象属性名相同且请求参数为多个
++ **数组参数**：请求参数名与形参对象属性名相同且请求参数为多个
 
   ```Java
   public String arrayParam(String[] likes){
@@ -645,6 +646,7 @@ protect Filter[] getServletFilters() {
   }
   ```
 
+<<<<<<< HEAD
 + 集合参数：请求参数名与形参集合对象名相同且请求参数为多个，用@RequestParam绑定参数关系
 
 
@@ -660,6 +662,67 @@ protect Filter[] getServletFilters() {
 + @PathVariable：用于从URL路径中获取参数，通常用于RESTful风格的API，参数直接嵌入在URL路径中。
 
 ```Java
+=======
++ **集合参数**：请求参数名与形参集合对象名相同且请求参数为多个，用@RequestParam绑定参数关系
+
++ **JSON格式参数**：
+
+  - 在pom.xml中添加相关依赖
+
+  - 在核心配置中添加@EnableWebMvc
+  - 添加@RequestBody
+
++ **日期类型参数**：使用@DateTimeFormat(pattern="yyyy-MM-dd")指定日期格式
+
+  
+
+## 响应
+
+**@ResponseBody**：当一个方法被@ResponseBody注解修饰时，Spring MVC会将方法的返回值序列化为JSON、XML或其他格式，并写入HTTP响应体中，返回给客户端。当使用@ResponseBody修饰方法时，Spring MVC会根据请求的Accept头部信息选择合适的HttpMessageConverter来将方法的返回值序列化为对应的HTTP响应数据格式
+
+
+
+**HttpMessageConverter**：Spring框架中用于处理HTTP请求和响应消息转换的核心接口之一，定义了将HTTP请求和响应中的数据转换为Java对象（反序列化）以及将Java对象转换为HTTP响应数据（序列化）的通用方法。
+
+
+
+##  REST风格
+
+REST（Representational State Transfer）：表现形式状态转换。是一种软件架构风格，而不是规范
+
+
+
+**传统风格资源描述形式**：
+
+ 	1. http://localhost/user/getById?id=1
+
+ 2. http://localhost/user/saveUser
+
+    
+
+**REST风格描述形式**：
+
+ 	1. http://localhost/user/1
+
+	2. http://localhost/user
+
+
+
+**优点：**
+
++ 隐藏资源的访问行为，无法通过地址得知对资源进行了什么操作
++ 简化了书写
+
+
+
+### 参数获取
+
+- @RequestParam：用于从请求中获取查询参数，通常通过?key=value形式传递在URL中。
+- @RequestBody：用于从请求体中提取数据
+- @PathVariable：用于从URL路径中获取参数，通常用于RESTful风格的API，参数直接嵌入在URL路径中。
+
+```
+>>>>>>> 81b426159fda15d709c112dfa26eca553985cc1c
 @RequestMapping(value="/users/{id},method = RequestMethod.DELETE")
 @ResponseBody
 public String delete(@PathVariable Integer id){
@@ -672,14 +735,21 @@ public String delete(@PathVariable Integer id){
 
 **应用：**
 
+<<<<<<< HEAD
 + 发送请求参数超过一个时，以JSON格式为主
 + 如果发送非JSON格式数据，选用@RequestParam接收请求参数
 + 采用RESTful开发，当参数较少时使用@PathVariable
+=======
+- 发送请求参数超过一个时，以JSON格式为主
+- 如果发送非JSON格式数据，选用@RequestParam接收请求参数
+- 采用RESTful开发，当参数较少时使用@PathVariable
+>>>>>>> 81b426159fda15d709c112dfa26eca553985cc1c
 
 
 
 ### 简化注解
 
+<<<<<<< HEAD
 + @RestController：@Controller + @ResponseBody。使用 @RestController注解的控制器类会自动将方法的返回值序列化为 JSON 或 XML 格式的数据，并将其直接写入 HTTP 响应体中。
 + @PostMapping：等价于@RequestMapping（method=RequestMethod.POST）
 + @DeleteMapping：等价于@RequestMapping（method=RequestMethod.DELETE）
@@ -690,3 +760,10 @@ public String delete(@PathVariable Integer id){
 
 
 
+=======
+- @RestController：@Controller + @ResponseBody。使用 @RestController注解的控制器类会自动将方法的返回值序列化为 JSON 或 XML 格式的数据，并将其直接写入 HTTP 响应体中。
+- @PostMapping：等价于@RequestMapping（method=RequestMethod.POST）
+- @DeleteMapping：等价于@RequestMapping（method=RequestMethod.DELETE）
+- @PutMapping：等价于@RequestMapping（method=RequestMethod.PUT）
+- @GetMapping：等价于@RequestMapping（method=RequestMethod.GET）
+>>>>>>> 81b426159fda15d709c112dfa26eca553985cc1c
