@@ -147,5 +147,72 @@ public Employee getById(Long id) {
 
 
 
-# 分类管理
+# 菜品管理
+
+## 公共字段自动填充
+
+每次对内容进行修改时都需要重复set修改时间和修改人id，出现了很多冗余代码，不便于后期维护
+
+**解决方法：**
+
++ 自定义AutoFill注解，用于标识需要进行公共字段自动填充的方法
++ 自定义切面类AutoFillAspect，统一拦截加入了AutoFill注解的方法，通过反射为公共字段赋值
++ 在Mapper的方法上加入AutoFill注解
+
+
+
+自定义切面类时，首先定义切入点。切入点表达式指明了需要执行通知的方法，但范围过大，所以需要用@annotation来指定注解，说明只有在上述执行范围内，并且添加了@AutoFill注解的方法才需要自动填充
+
+```Java
+@Pointcut("execution (* com.sky.mapper.*.*(..)) && @annotation(com.sky.annotation.AutoFill)")
+    public void autoFillPointCut(){}
+```
+
+然后编写通知内容
+
+```Java
+//获取当前被拦截方法上的数据库操作类型
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);
+        OperationType operationType = autoFill.value(); //获取操作类型
+```
+
+
+
+## 文件上传
+
+**阿里云bucket配置**
+
+首先需要在yml配置文件中写好endpoint, access-key-id, access-key-secret, bucket-name的值。
+
+再写一个工具类AliOssUtil，通过这个类创建OSSClient实例，并且创建PutObject请求。
+
+最后写一个配置类OssConfiguration，通过这个类返回一个AliOssUtil对象，并且将其交给Ioc容器管理。
+
+```Java
+public class OssConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties){
+        log.info("创建阿里云文件上传工具类对象：{}",aliOssProperties);
+        return new AliOssUtil(aliOssProperties.getEndpoint(), aliOssProperties.getAccessKeyId(),
+                aliOssProperties.getAccessKeySecret(), aliOssProperties.getBucketName());
+    }
+}
+```
+
+
+
+**上传文件：**
+
+获取文件的原始名称，再拼接到UUID生成的字符串后面，以保证文件名的唯一性，防止文件上传到bucket后因为重名而被覆盖
+
+```Java
+UUID.randomUUID().toString();
+```
+
+
+
+## 新增菜品
 
