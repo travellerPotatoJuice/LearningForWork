@@ -216,3 +216,23 @@ UUID.randomUUID().toString();
 
 ## 新增菜品
 
+
+
+
+
+## 删除菜品
+
+**@RequestParam**
+
+由于删除菜品时需要实现批量删除操作，所以在传参的时候需要使用@RequestParam注解标注传递的id组成的list
+
+
+
+**批量删除性能优化**
+
+频繁使用for循环获取id，再根据id去删除对应的菜品和口味会导致发出的sql语句太多，从而影响性能。可以优化成批量删除，并且用动态sql来实现
+
+```
+delete from dish where id in ids
+```
+
