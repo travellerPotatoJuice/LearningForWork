@@ -324,3 +324,50 @@ on delete cascade;
 
 
 
+### 多表查询
+
+**内连接：**
+
+```sql
+--隐式内连接
+--select 字段列表 from 表1,表2 where 条件
+select * from emp, dept where emp.dept_id = dept.id
+
+
+--显式内连接
+--select 字段列表 from 表1 [inner] join 表2 on 连接条件
+select * from emp inner joiin dept on emp.dept_id = dept.id;
+```
+
+**外连接**
+
+```sql
+--左外连接
+--包含表1全部的数据，以及表1和表2交集的数据
+select e.*, d.name from emp e left out join dept d on e.dept_id = d.id
+
+
+--右外连接
+--包含表2全部的数据，以及表1和表2交集的数据
+select e.*, d.name from emp e right out join dept d on e.dept_id = d.id
+```
+
+
+
+
+
+**子连接**
+
+
+
+
+
+
+
+## 事务
+
+事务是一组操作的集合，是一个不可分割的工作单位。MySQL的事务默认是自动提交的，也就是说当执行一条DML语句时，MySQL会立刻隐式地提交事务
+
+
+
+### 四大特性（ACID）
