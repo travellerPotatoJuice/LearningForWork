@@ -243,25 +243,25 @@ revoke 权限列表 on 数据库名.表名 to '用户名'@'主机名'
 
 ## 函数
 
-### 字符串函数
+**字符串函数**
 
 ![image-20240109204003089](image\image-20240109204003089.png)
 
 
 
-### 数值函数
+**数值函数**
 
 ![image-20240109204652212](image\image-20240109204652212.png)
 
 
 
-### 日期函数
+**日期函数**
 
 ![image-20240109205121982](image\image-20240109205121982.png)
 
 
 
-### 流程函数
+**流程函数**
 
 ![image-20240110153633953](image\image-20240110153633953.png)
 
@@ -271,9 +271,56 @@ revoke 权限列表 on 数据库名.表名 to '用户名'@'主机名'
 
 作用于表中字段上的规则
 
-+ 非空约束： not null
++ 非空约束：not null
 + 唯一约束：unique
 + 主键约束：primary key
 + 默认约束：default
 + 检查约束（8.0.16版本之后）：check
 + 外键约束：foreign key。让两张表之间建立连接，从而保证数据的一致性和完整性。有外键的是子表，被关联的是父表
+
+```sql
+-- 添加外键
+alter table emp add constraint fk_emp_dept_id foreign key (dept_id) references dept(id);
+
+
+--删除外键
+alter table emp drop foreign key fk_emp_dept_id
+```
+
+
+
+**外键约束的 删除、更新行为：**
+
++ no action ：父表删除/更新记录时，首先检查记录是否对应外键，如果有就不允许删除/更新 （与restrict一致）（默认行为）
++ restrict ：父表删除/更新记录时，首先检查记录是否对应外键，如果有就不允许删除/更新 （与no action一致）（默认行为）
++ cascade：父表删除/更新记录时，首先检查记录是否对应外键，如果有就对子表内容也进行更新
++ set null ： 父表删除/更新记录时，首先检查记录是否对应外键，如果有就将子表中该外键设置为null
++ set default ：父表有变更时，子表将外键列设置成一个默认值
+
+```sql
+alter table emp add constraint fk_emp_dept_id foreign key (dept_id) references dept(id) on update cascade
+on delete cascade;
+```
+
+
+
+##多表查询
+
+### 多表关系
+
+**一对一：**
+
+在任意一方加入外键，关联对方的主键，并将外键设置为unique
+
+**一对多：**
+
+在" 多 "的一方创建外键，指向” 一 “的一方的主键
+
+**多对多：**
+
+建立一张中间表，中间表中至少包含两个外键，分别关联双方的主键
+
+
+
+
+
