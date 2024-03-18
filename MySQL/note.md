@@ -21,27 +21,27 @@ SQL分类：
 
 ### DDL：数据定义语言
 
-#### 操作数据库
+**操作数据库**
 
-查询所有数据库：show databases;
++ 查询所有数据库：show databases;
 
-查询当前数据库：select database();
++ 查询当前数据库：select database();
 
-创建：create database [if not exists] 数据库名 [default charset  字符集] [collate 排序规则]；
++  创建：create database [if not exists] 数据库名 [default charset  字符集] [collate 排序规则]；
 
-删除：drop database [if exists] 数据库名；
++ 删除：drop database [if exists] 数据库名；
 
-使用：use 数据库名;
++ 使用：use 数据库名;
 
 
 
-#### 操作表结构
+**操作表结构：**
 
-查询当前数据库所有表：show tables;
++ 查询当前数据库所有表：show tables;
 
-查询表结构：desc 表名；
++ 查询表结构：desc 表名；
 
-查询指定表的建表语句：show create table 表名；
++ 查询指定表的建表语句：show create table 表名；
 
 创建：
 
@@ -57,7 +57,9 @@ SQL分类：
 
 ​	tip:建表的时候需要留意数据是否是定长，数据的类型，数据的长度，数据是否有符号等，根据具体要求选择数据类型。
 
-##### 数据类型
+
+
+**数据类型**
 
 日期类型
 
@@ -67,7 +69,7 @@ SQL分类：
 4. datatime：有效时间到9999年
 5. timestamp：有效时间到2038年
 
-##### 修改
+**修改**
 
 添加字段：alter table 表名 add 字段名 类型（长度）\[comment 注释\][约束];
 
@@ -79,7 +81,7 @@ SQL分类：
 
 修改表名：alter table 表名 rename to 新表名；
 
-##### 删除
+**删除**
 
 删除表：drop table [if exists] 表名；
 
@@ -89,7 +91,7 @@ SQL分类：
 
 ### DML：数据操作语言
 
- #### 添加数据
+**添加数据**
 
 给指定字段添加数据： insert into 表名 （字段名1，字段名2，...）values (值1，值2，...)
 
@@ -109,7 +111,7 @@ SQL分类：
 
 
 
-#### 修改数据
+**修改数据**
 
 修改数据：update 表名 set 字段名=值1, 字段名2=值2，...[where 条件]；
 
@@ -123,7 +125,7 @@ SQL分类：
 
 ### DQL：数据查询语言
 
-#### **基本查询**
+**基本查询**
 
 查询多个字段：select 字段1[as 别名1]，字段2[as 别名2]，字段3[as 别名3]...from 表名；
 
@@ -131,7 +133,7 @@ SQL分类：
 
 
 
-#### **条件查询**
+**条件查询**
 
 select 字段列表 from 表名 where 条件列表;
 
@@ -139,7 +141,7 @@ select 字段列表 from 表名 where 条件列表;
 
 
 
-#### **聚合函数**
+**聚合函数**
 
 所有的null值是不参与聚合函数运算的
 
@@ -149,7 +151,7 @@ select 聚合函数（字段列表） from 表名;
 
 
 
-#### **分组查询**
+**分组查询**
 
 ```SQL
 select 字段列表 from 表名 [where 条件] group by 分组字段名 [having 分组后过滤条件];
@@ -161,7 +163,7 @@ select 字段列表 from 表名 [where 条件] group by 分组字段名 [having 
 
 
 
-#### **排序查询**
+**排序查询**
 
 ```SQL
 select 字段列表 from 表名 order by 字段1 排序方式，字段2 排序方式;
@@ -173,7 +175,7 @@ select 字段列表 from 表名 order by 字段1 排序方式，字段2 排序�
 
 
 
-#### **分页查询**
+**分页查询**
 
 ```SQL
 select 字段列表 from 表名 limit 起始索引,查询记录数;
@@ -187,7 +189,7 @@ select 字段列表 from 表名 limit 起始索引,查询记录数;
 
 
 
-#### DQL执行顺序
+DQL执行顺序
 
 1. from：确认要查询的数据表
 2. where：筛选满足条件的行
@@ -204,7 +206,7 @@ select 字段列表 from 表名 limit 起始索引,查询记录数;
 
 用来管理数据库用户，控制数据库的访问权限
 
-#### 管理用户用户
+**管理用户用户**
 
 ```sql
 /*查询用户*/
@@ -224,7 +226,7 @@ drop user '用户名'@'主机名';
 
 
 
-#### 权限控制
+**权限控制**
 
 ![image-20240109200915532](image\image-20240109200915532.png)
 
@@ -306,7 +308,7 @@ on delete cascade;
 
 ##多表查询
 
-### 多表关系
+**多表关系**
 
 **一对一：**
 
@@ -324,7 +326,7 @@ on delete cascade;
 
 
 
-### 多表查询
+**多表查询**
 
 **内连接：**
 
@@ -364,13 +366,13 @@ select e.*, d.name from emp e right out join dept d on e.dept_id = d.id
 
 
 
-## 事务
+# 事务
 
 事务是一组操作的集合，是一个不可分割的工作单位。MySQL的事务默认是自动提交的，也就是说当执行一条DML语句时，MySQL会立刻隐式地提交事务
 
 
 
-### 四大特性（ACID）
+## 四大特性（ACID）
 
 **原子性（Atomicity）**：事务是数据库操作的最小单元，要么全部执行成功，要么全部失败回滚，不存在部分执行的情况。
 
@@ -493,7 +495,9 @@ B树的一种变体。
 
 **按应用维度分：**
 
-+ 主键索引
++ 主键索引：默认创建，一张表只能有一个
++ 唯一索引：索引列中的值是唯一的，一张表可以有多个唯一索引
++ 全文索引：针对文本列创建的索引，用于支持全文搜索
 
 
 
@@ -526,10 +530,6 @@ B树的一种变体。
 
   
 
-
-
-
-
 ## 索引使用规则
 
 **使用规则：最左前缀法则：**
@@ -548,24 +548,28 @@ B树的一种变体。
 
 **使用规则：前缀索引**
 
-前缀索引（Prefix Index）是一种针对索引列的部分值而不是全部值进行索引的技术。在创建前缀索引时，只索引列值的前缀部分，而不是整个列值。
+前缀索引（Prefix Index）是一种针对索引列的部分值而不是全部值进行索引的技术。在创建前缀索引时，只索引列值的前缀部分，而不是整个列值。使用前缀索引可以减少索引的大小，更多的索引项可以存储在内存中，减少磁盘访问次数
 
 ```sql
 -- 在n中填写前缀长度
 create index idx_xxxx on table_name(column(n));
 ```
 
+前缀长度可以根据索引的选择性来决定，选择性指的是不重复的索引值（基数）和数据表的记录总数的比值，索引选择性越高，查询效率越高，最好的索引选择性是1。
 
+----------------------
 
+**使用规则：单列索引和联合索引**
 
++ 单列索引：针对单个列创建的索引。
 
++ 联合索引：联合索引是针对多个列创建的索引。它包含多个列的值，并按照这些列的顺序进行排序。
 
+单列索引容易造成回表查询，因为其索引覆盖不足，当需要查询的列不都包含在索引中时，需要进行回表查询
 
+联合索引可以加速多个列的组合查询，但是相应的它需要存储的索引大小更大。使用联合索引时需要注意最左前缀法则
 
-
----------------------------
-
-**索引失效情况的情况：**
+## 索引失效
 
 + 在索引上进行函数操作
 + 在索引上出现了隐式类型转换。比如说存储的是char，但是查询的时候填写的字段值没有加上单引号，就会出现隐式类型转换，此时索引就失效了
@@ -585,6 +589,28 @@ select * from emp ignore index(inx_emp_gender) where status=1;
 -- 强制要求mysql使用xx索引
 select * from emp force index(inx_emp_gender) where status=1;
 ```
+
+
+
+## 索引设计原则
+
+**创建索引的对象**：
+
++ 数据量较大或者查询频繁的表
+
++ 对where，order by，group by操作的字段建立索引
+
+**创建索引的原则**：
+
++ 选择适当的列。选择区分度高的列或者经常被查询的列作为索引项。
++ 使用前缀索引。对于较大的文本列和长字符串考虑前缀索引
++ 利用联合索引。联合索引可以避免回表查询
++ 避免过度索引。索引越多，占用的磁盘空间越大。过多的索引会影响增删改效率，提高维护成本。
++ 如果索引列不能存储null值，在创建表时用not null约束。优化器可以通过这一点更好地选择索引
+
+
+
+
 
 
 
@@ -634,7 +660,75 @@ select * from emp force index(inx_emp_gender) where status=1;
   explain select 字段列表 from 表名 where 条件
   ```
 
+
+
+
+## 插入数据优化
+
++ 批量插入。一次性插入多条数据而不是逐行插入，这样可以减少与数据库服务器的通信次数
+
++ 手动提交事务。默认是自动提交事务的，如果不手动控制，插入数据的过程会涉及频繁的事务开启和提交
+
++ 主键顺序插入。数据库通常会将数据按照主键的顺序进行组织和存储。主键顺序插入可以减少页面分裂，也能更好地利用磁盘顺序IO的特性，减少随机IO的开销
+
++ 大批量插入数据时使用load指令
+
+  ```sql
+  --连接数据库时加上参数 --local-infile
+  mysql --local-infile -u root -p
   
+  --设置全局参数local_infile为1，打开从本地导入数据的开关
+  set global local_infile=1;
+  
+  --执行load加载数据
+  load data local infile 'xxx.log' into table 'xxx' 
+  fields terminated by 'x' 
+  lines terminated by 'x';
+  ```
+
+
+
+## order by优化
+
+1. using filesort：通过表的索引或者全表扫描，读取满足条件的数据行，在排序缓冲区中完成排序并返回
+2. using index：通过有序索引顺序扫描直接返回有序数据，不需要额外数据
+
++ using filesort的效率比using index差
++ 如果不可避免地出现filesort，大数据量的排序时，可以适当增加排序缓冲区大小sort_buffer_size
+
+# 视图
+
+
+
+```sql
+-- 创建视图：
+create [or replace] view 视图名称 
+as select语句 
+[with[cascaded|local]] check option;
+
+-- 查询视图
+show create view 视图名称;
+
+-- 查询视图中的数据(和查询表一样)
+select * from 视图名称;
+
+-- 修改视图1
+create [or replace] view 视图名称 
+as select语句 
+[with[cascaded|local]] check option;
+
+-- 修改视图2
+alter view 视图名称[(列名列表)]
+as select 
+[with[cascaded|local]] check option;
+
+-- 删除视图
+drop view [if exists] 视图名称 [,视图名称]...
+```
+
+
+
+# 存储过程
 
 # 锁
 
