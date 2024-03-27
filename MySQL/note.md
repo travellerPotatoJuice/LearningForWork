@@ -836,3 +836,85 @@ unlock tables
 
 # InnoDB引擎
 
+
+
+# 日志
+
+## 错误日志
+
+MySQL错误日志是一个记录了MySQL数据库服务器运行时发生的错误、警告以及其他重要事件的日志文件。
+
+```
+# 查看错误日志
+show variables like '%log_error%';
+```
+
+
+
+## 二进制日志(binlog)
+
+二进制日志（Binary Log）包含了数据库中执行的写操作，主要是INSERT、UPDATE、DELETE等修改数据的操作。
+
+**作用**：
+
++ 灾难时的数据恢复
++ MySQL的主从复制
+
+
+
+**感觉和Redis的AOF文件有点像？**
+
+```
+# 查看二进制日志相关信息
+show variables '%log_bin%'
+
+# 查看日志格式
+show variables like '%binlog_format%';
+```
+
+
+
+**二进制日志的格式**
+
++ statement：记录的是对数据进行修改的SQL语句
++ row：记录的是每一行的数据变更，会显示变更前后的数据
++ mixed：
+
+
+
+## 查询日志(querylog)
+
+是一种记录数据库服务器接收到的查询请求的日志。它记录了每个查询请求的详细信息，包括查询语句、执行时间、执行结果等
+
+```
+# 查看查询日志相关信息
+show variables '%general%'
+```
+
+
+
+```sql
+# 查询日志
+2024-03-27T10:15:20.123456Z   12345 Query       SELECT * FROM users WHERE id = 123;
+2024-03-27T10:15:21.234567Z   12346 Query       UPDATE products SET price = price * 1.1 WHERE category = 'electronics';
+2024-03-27T10:15:22.345678Z   12347 Query       DELETE FROM orders WHERE order_date < '2024-01-01';
+
+```
+
+
+
+## 慢查询日志
+
+慢查询日志（Slow Query Log）是数据库系统中的一种日志记录功能，用于记录执行时间超过预定义阈值的查询请求。
+
+```sql
+# 慢查询日志
+# Time: 2024-03-27T10:15:20.123456Z
+# User@Host: myuser[myuser] @ localhost []
+# Query_time: 5.123456  Lock_time: 0.000789 Rows_sent: 10  Rows_examined: 1000
+SET timestamp=1679873720;
+SELECT * FROM my_table WHERE column1 = 'value' ORDER BY column2 DESC;
+```
+
+
+
