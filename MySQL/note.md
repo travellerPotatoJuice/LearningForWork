@@ -827,11 +827,6 @@ unlock tables
 
 
 
-**注意**：
-
-- 针对唯一索引进行检索，对已存在的记录进行等值匹配时，会自动退化为行锁
-- InnoDB是针对索引加的锁，如果不通过索引条件检索数据，InnoDB就会对表中所有记录上锁，**注意是对每一条记录加临键锁，而不是直接加表锁**。
-
 
 
 <font size=5>**唯一索引的行锁**</font>
@@ -870,15 +865,127 @@ unlock tables
 
 <font size=5>**普通索引的行锁**</font>
 
-+ 在普通索引上进行等值查询时，会向表添加意向锁IX，查询的位置如果存在就会加临键锁，并给该记录的主键索引加行锁，下一个不满足条件的位置加间隙锁。查询的位置如果不存在，会向表添加意向锁IX，下一个不满足条件的位置加间隙锁。
++ 在普通索引上进行等值查询时，如果记录不存在，会找到第一个不满足条件的记录，然后加gap锁
++ 在普通索引上进行等值查询时，如果记录存在，会先找到第一个满足条件的记录，加next-key锁。同时再对主键索引中的对应记录加Record锁。再找到第一个不满足条件的记录加gap锁
 
-  例子：表中有id=1，5，6，7，8，9，10，20的索引，执行update user set name='dsagg' where decription='6666';会在主键索引id=9的地方加行锁，普通索引idx_name的'6666'加临键锁，'7777'加间隙锁。执行update user set name='dsagg' where decription='66661'；会在'7777'加间隙锁。![image-20240329195711234](image/image-20240329195711234.jpg)
 
-+ 间隙锁的唯一目的是防止其他事务插入间隙。间隙锁可以共存，一个事务采用的间隙不会阻止另一个事务在同一间隙上采用间隙锁。
+
+<font size=5>**没有索引项的行锁**</font>
+
++ 如果锁定读查询语句，没有使用索引列作为查询条件，或者查询语句没有走索引查询，导致扫描是全表扫描。那么，**每一条记录的索引上都会加 next-key 锁**。<font color = red >**而不是加表锁！！！！！**</font>
 
 
 
 # InnoDB引擎
+
+## 逻辑存储结构
+
++ 表空间（TableSpace）：一个mySQL实例可以对应多个表空间。
++ 段（Segment）：分为数据段，索引段，回滚段。数据段就是存放B+树的叶子节点的区的集合，索引段是B+树的非叶子节点的区的集合。
++ 区（Extent）：为了保证页的连续性，提高对页的读取速度。InnoDB存储引擎每次都会从磁盘中申请4~5个区，每个区的大小一般为1MB，也就是说一个区里默认有64个连续的页
++ 页（Page）：数据库读写的基本单位，默认大小为16KB，也就是最多能保证16KB的连续存储空间。**b+树中的每一个节点都是一个页**
++ 行（Row）：数据库表中的记录都是按照行进行存放的
+
+
+
+
+
+## InnoDB架构
+
+<font size=5>**内存结构**</font>
+
+**Buffer Pool（缓冲池）**
+
+主内存中的一个区域，可以缓存磁盘上经常操作的数据，执行增删操作时，先操作缓冲池中的数据（如果没有数据，就从磁盘里加载到缓冲池），再刷新到磁盘（不会立刻刷新）
+
+操作单位为页，页可被分为free page(空闲，未被使用)，clean page（被使用，但没被修改），dirty page（被修改）。
+
+强调对读取的优化，减少对磁盘的读取次数。
+
+
+
+**Change Buffer**
+
+专门针对非唯一的二级索引，当执行DML语句的时候，如果对应的数据不在Buffer Pool里，会先将数据变更存在Change Buffer里，在数据被读取时再将数据合并到Buffer Pool里，最后再将数据刷新到磁盘里
+
+强调对非唯一二级索引的更新优化
+
+
+
+**Adaptive Hash Index**
+
+用于优化对Buffer Pool中数据的查询。如果观察到Hash索引能够提升速度，系统会根据情况自动建立自适应哈希索引，无需人工干预
+
+具体来说，当InnoDB发现某个索引经常被等值查询，它就会尝试构建一个哈希索引，索引的key是键值，value是**指向Buffer Pool中某个页**的指针
+
+
+
+**Log Buffer**
+
+保存要写入到磁盘中的日志数据，当应用程序执行写入操作（如插入、更新、删除）时，相关的修改操作首先被写入到 Log Buffer 中，而不是直接写入磁盘的重做日志文件（Redo Log）
+
+------------------
+
+<font size=5>**磁盘结构**</font>
+
++ 系统表空间
++ 独立表空间
++ 通用表空间
+
++ 撤销表空间：mySQL实例在初始化时会自动创建两个默认的undo表空间，用于存储undo log日志
++ 临时表空间
++ 双写缓冲区：innodb引擎将数据从Buffer Pool刷新到磁盘前会先写到双写缓冲区中
++ Redo Log Group：重做日志组。事务提交后会将所有的修改信息到存到该日志中，用于发生错误时进行数据恢复
+
+
+
+## MVCC
+
+多版本并发控制，通过在每个数据行上维护多个版本的数据来实现的。当一个事务要对数据库中的数据进行修改时，MVCC 会为该事务创建一个数据快照，而不是直接修改实际的数据行。MVCC的实现依赖于：**隐藏字段，read view，undo log**。
+
+
+
+**隐藏字段**：InnoDB引擎会为数据生成以下的隐藏字段。
+
++ db_trx_id：最近修改事务ID，记录插入这条记录或最后一次修改这个记录的事务的id。<font color=red> delete操作被视为更新，只是会在record header中的delete_flag字段里标记为已删除</font>
++ db_roll_ptr：指向这条记录的上一个版本
++ db_row_id（可选）：隐藏主键，如果表结构没有指定主键，会自动生成该字段，用于生成聚簇索引。
+
+
+
+**read view：**
+
++ m_low_limit_id：目前出现过的最大的事务 ID+1，即**下一个将被分配的事务 ID**。大于等于这个 ID 的数据版本均不可见
++ m_up_limit_id：活跃事务列表 m_ids中最小的事务 ID，如果 m_ids 为空，则 m_up_limit_id为 m_low_limit_id。小于这个 ID 的数据版本均可见
++ m_ids：Read View创建时其他未提交的活跃事务 ID 列表。创建 Read View时，将当前未提交事务 ID 记录下来，后续即使它们修改了记录行的值，对于当前事务也是不可见的。m_ids不包括当前事务自己和已提交的事务（正在内存中）
++ m_creator_trx_id：创建该read view的事务 ID
+
+undo log链：
+
+(新)--------不可见--------|------在ids中不可见，不在就可见----|----可见-----(老)
+
+​							m_low_limit_id									m_up_limit_id
+
+
+
+**undo log:**
+
++ insert undo log：insert操作产生的undo log，可以在事务提交后直接删除
++ update undo log：update或者delete操作产生的undo log，提交时放入undo log链，等待purge线程的删除
+
+------------------------
+
+**当前读&快照读**
+
+当前读：读取的是数据的最新版本
+
+快照读：读取的是数据的可见版本，可能是历史数据。
+
+
+
+InnoDB引擎在快照读时使用MVCC来解决幻读问题，在当前读时使用next-key lock来解决幻读问题
+
+
 
 
 
@@ -895,18 +1002,131 @@ show variables like '%log_error%';
 
 
 
-## 二进制日志(binlog)
-
-二进制日志（Binary Log）包含了数据库中执行的写操作，主要是INSERT、UPDATE、DELETE等修改数据的操作。
-
-**作用**：
-
-+ 灾难时的数据恢复
-+ MySQL的主从复制
 
 
+## 重做日志(redo log)
 
-**感觉和Redis的AOF文件有点像？**
+Innodb存储引擎层生成的日志，实现了事务中的**持久性**，主要用于**故障恢复**
+
+redo log是物理日志，由 ”表空间号+数据页号+偏移量+修改数据长度+具体修改的数据“ 组成，里面记录的内容类似于：
+
+**对 XXX 表空间中的 YYY 数据页 ZZZ 偏移量的地方做了AAA 更新**
+
+
+
+WAL：（Write-Ahead Logging）。事务提交时，redo log会被持久化入磁盘中，而被修改的数据会存在于Buffer Pool里（脏页），等待后台线程的刷新。这样，即便数据库出现了崩溃，脏页数据丢失了，mySQL仍然可以在重启后通过磁盘中redo log的内容对数据进行恢复。
+
+redo log buffer存在于内存的log buffer中，redo log file存在于磁盘里。每产生一条redo log，它会被先写到redo log buffer里，后续再写入磁盘里的redo log file中。在以下几种情况里，redo log会被刷新到磁盘：
+
++ mySQL正常关闭
++ redo log buffer中记录的写入量大于redo log buffer的一半容量
++ innoDB后台线程每隔1秒会刷盘一次
++ 事务提交（这个可以由innodb_flush_log_at_trx_commit 参数控制）
+  + 参数为1：事务每次提交就进行一次刷盘
+  + 参数为0：事务提交时不刷盘
+  + 参数为2：事务每次提交，将redo log写到page cache中
+
+安全性：参数1>参数2>参数0
+
+写入性能：参数0>参数2>参数1
+
+安全性与写入性能不可兼得！！！！
+
+
+
+**对比一下redo log刷盘机制和redis aof持久化策略**
+
+redo log：
+
++ 写入redo log buffer，写入磁盘
+
++ 写入redo log buffer，后台线程写入page cache，后台线程写入磁盘（后台线程每秒干一次活）
++ 写入redo log buffer，写入page cache，后台线程写入磁盘（后台线程每秒干一次活）
+
+
+
+aof：
+
++ 写入aof buffer，写入page cache，写入磁盘
++ 写入aof buffer，写入page cache，后台线程写入磁盘（后台线程每秒干一次活）
+
++ 写入aof buffer，写入page cache，操作系统写入磁盘（操作系统想干活的时候干活）
+
+
+
+**redo log文件写满了怎么办**
+
+磁盘里有redo log group，由两个redo log文件组成，两个文件形成一个环形结构，A写满了写B，B也写满了就覆盖A。
+
+对这个逻辑上的环形结构，会维护两个位置，一个是write pos，另一个是check point。write pos记录当前写的位置，check point记录当前已经落盘的数据位置。
+
+write pos赶上check point的时候就说明没有可以继续写的空间了，就需要等check point移动，即等脏数据落盘。
+
+
+
+## 回滚日志(undo log)
+
+Innodb存储引擎层生成的日志，实现了事务中的**原子性**，主要用于**事务回滚**和**MVCC**
+
+不同操作形成的undo log格式不同，但是undo log中都会有一个roll_pointer指针和trx_id事务id。指针用于指向下一个undo log, 将这些undo log串起来形成版本链条。trx_id事务id用于标识该条记录是由哪个事务产生的
+
+![image-20240330161854494](image/image-20240330161854494.jpg)
+
+每次产生了新的undo log，就会**插入到链条的头部**，当需要对某数据进行读取的时候，会去查找undo log，如果当前undo log的版本太新，就会顺着链条往后查，查到一个版本比较旧的数据。用这种机制可以辅助实现事务的隔离级别。
+
+每次进行事务回滚时，数据库会沿着undo log链进行搜索，对读取到的满足条件的undo log进行逆向操作。比如说当前的undo log链条是这样的：<trx_id 1> -> <trx_id 1> -> <trx_id 2> -> <trx_id 3>。这个时候事务2要回滚了，数据库就从头开始查，查到第三条undo log的事务号是2，就读取这个操作，并且在数据库中进行反向操作。
+
+
+
+**undo log是怎么进行刷盘的？**
+
+buffer pool 中有 undo 页，对 undo 页的修改也都会记录到 redo log。redo log 会每秒刷盘，提交事务时也会刷盘，数据页和 undo 页都是靠这个机制保证持久化的。实际的 undo log 数据则会被存储在磁盘上的 undo tablespace 中。
+
+undo log虽然是用于事务回滚，但是每次事务提交后undo log不会立刻销毁
+
+
+
+**redo log 和 undo log的区别**
+
++ redo log更侧重于事务**完成后**的状态，记录的是更新后的值
++ undo log更侧重于事务**开始前**的状态，记录的是更新前的值
+
+
+
+## 二进制日志(bin log)
+
+是 Server 层生成的日志，主要用于**数据备份**和**主从复制**；
+
+
+
+二进制日志（Binary Log）包含了数据库中执行的写操作，主要是INSERT、UPDATE、DELETE等修改数据的操作，不会记录查询类的操作（比如select，show）
+
+
+
+**二进制日志的格式**
+
++ statement：记录的是对数据进行修改的SQL语句。再次重现的时候会出现动态函数问题，比如说用了uuid，now这些函数，再次执行的时候结果就不一样了
++ row：记录的是数据行最后被修改成什么样了，所以不会出现动态函数问题。它的缺点是每行数据变化结果都会被记录，比如说批量update，更新多少行就会产生多少数据，但是statement就只会有一个update语句。
++ mixed：包含了 statement 和 row模式，它会根据不同的情况自动使用 row模式和 statement模式；
+
+
+
+**redo log和bin log的区别**
+
++ 适用对象不同
+  + redo log是innodb引擎自己实现的，别的存储引擎不能用
+  + bin log在MySQL Server层实现，所有引擎都能用
++ 文件格式
+  + redo log记录的是在某数据页进行的修改，比如对 XXX 表空间中的 YYY 数据页 ZZZ 偏移量的地方做了AAA 更新
+  + bin log有三种记录模式
++ 写入方式
+  + redo log是循环写，写满了就从头开始写
+  + bin log是追加写，写满了文件就新建一个文件继续写
++ 用途
+  + redo log 用于掉电之后的恢复
+  + bin log 用于备份恢复，主从复制
+
+
 
 ```
 # 查看二进制日志相关信息
@@ -918,11 +1138,7 @@ show variables like '%binlog_format%';
 
 
 
-**二进制日志的格式**
 
-+ statement：记录的是对数据进行修改的SQL语句
-+ row：记录的是每一行的数据变更，会显示变更前后的数据
-+ mixed：
 
 
 
