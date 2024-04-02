@@ -900,7 +900,9 @@ unlock tables
 
 操作单位为页，页可被分为free page(空闲，未被使用)，clean page（被使用，但没被修改），dirty page（被修改）。
 
-强调对读取的优化，减少对磁盘的读取次数。
+InnoDB为每个缓存页都创建了一个控制块，里面包括了（缓存页的表空间，页号，缓存页地址，链表节点）等信息，这些控制块会存在放Buffer Pool的最前面
+
+InnoDB通过Free List（空闲页链表），Flush List（脏页链表）来对空闲缓存页和脏页进行管理，通过改进的LRU算法（将LRU链表分为young区和old区）来对脏页进行刷盘操作。
 
 
 
@@ -977,9 +979,9 @@ undo log链：
 
 **当前读&快照读**
 
-当前读：读取的是数据的最新版本
+当前读：也叫锁定读，读取的是数据的最新版本，会对读取的记录加锁
 
-快照读：读取的是数据的可见版本，可能是历史数据。
+快照读：读取的是数据的可见版本，可能是历史数据。其他并发事务对数据行的修改不会影响当前事务的读取操作。
 
 
 
@@ -1002,8 +1004,6 @@ show variables like '%log_error%';
 
 
 
-
-
 ## 重做日志(redo log)
 
 Innodb存储引擎层生成的日志，实现了事务中的**持久性**，主要用于**故障恢复**
@@ -1020,7 +1020,7 @@ redo log buffer存在于内存的log buffer中，redo log file存在于磁盘里
 
 + mySQL正常关闭
 + redo log buffer中记录的写入量大于redo log buffer的一半容量
-+ innoDB后台线程每隔1秒会刷盘一次
++ innoDB后台线程每隔1秒会刷盘一次【这就是redo log的优越之处，在长事务的情况下，redo log每隔一秒钟就会刷一次，但是bin log得等事务提交之后才能刷】
 + 事务提交（这个可以由innodb_flush_log_at_trx_commit 参数控制）
   + 参数为1：事务每次提交就进行一次刷盘
   + 参数为0：事务提交时不刷盘
@@ -1036,7 +1036,7 @@ redo log buffer存在于内存的log buffer中，redo log file存在于磁盘里
 
 **对比一下redo log刷盘机制和redis aof持久化策略**
 
-redo log：
+redo log：在redo log buffer，page cache，磁盘三个里选一个放，后续的步骤由另外一个线程实现
 
 + 写入redo log buffer，写入磁盘
 
@@ -1095,36 +1095,9 @@ undo log虽然是用于事务回滚，但是每次事务提交后undo log不会�
 
 ## 二进制日志(bin log)
 
-是 Server 层生成的日志，主要用于**数据备份**和**主从复制**；
-
-
+是 Server 层生成的日志，主要用于**数据备份**和**主从复制**；事务提交时，该事务执行过程中产生的所有binlog会被同一写入binlog文件
 
 二进制日志（Binary Log）包含了数据库中执行的写操作，主要是INSERT、UPDATE、DELETE等修改数据的操作，不会记录查询类的操作（比如select，show）
-
-
-
-**二进制日志的格式**
-
-+ statement：记录的是对数据进行修改的SQL语句。再次重现的时候会出现动态函数问题，比如说用了uuid，now这些函数，再次执行的时候结果就不一样了
-+ row：记录的是数据行最后被修改成什么样了，所以不会出现动态函数问题。它的缺点是每行数据变化结果都会被记录，比如说批量update，更新多少行就会产生多少数据，但是statement就只会有一个update语句。
-+ mixed：包含了 statement 和 row模式，它会根据不同的情况自动使用 row模式和 statement模式；
-
-
-
-**redo log和bin log的区别**
-
-+ 适用对象不同
-  + redo log是innodb引擎自己实现的，别的存储引擎不能用
-  + bin log在MySQL Server层实现，所有引擎都能用
-+ 文件格式
-  + redo log记录的是在某数据页进行的修改，比如对 XXX 表空间中的 YYY 数据页 ZZZ 偏移量的地方做了AAA 更新
-  + bin log有三种记录模式
-+ 写入方式
-  + redo log是循环写，写满了就从头开始写
-  + bin log是追加写，写满了文件就新建一个文件继续写
-+ 用途
-  + redo log 用于掉电之后的恢复
-  + bin log 用于备份恢复，主从复制
 
 
 
@@ -1138,11 +1111,111 @@ show variables like '%binlog_format%';
 
 
 
+**bin log的格式**
+
++ statement：记录的是对数据进行修改的SQL语句。再次重现的时候会出现动态函数问题，比如说用了uuid，now这些函数，再次执行的时候结果就不一样了
++ row：记录的是数据行最后被修改成什么样了，所以不会出现动态函数问题。它的缺点是每行数据变化结果都会被记录，比如说批量update，更新多少行就会产生多少数据，但是statement就只会有一个update语句。
++ mixed：包含了 statement 和 row模式，它会根据不同的情况自动使用 row模式和 statement模式；
+
+
+
+**基于bin log实现主从复制**
+
+注意：由于主库要维护log dump线程为从库提供binlog日志，所以并不是从库越多就越好。从库太多的时候会对主库的资源造成大量的消耗。
+
+主从复制有三种实现模型，以下说默认的实现模型——异步复制的实现流程
+
++ 写入bin log：主写bin log日志，提交事务。
++ 同步bin log：主将binlog复制到所有从，从将binlog写入relay log（中继日志）中
++ 回放bin log：从回放bin log，更新存储引擎中的数据
+
+
+
+![image-20240401162448471](image/image-20240401162448471.jpg)
+
+主从复制模型：
+
++ 同步复制：MySQL主库等所有的从库都响应复制成功，才给客户端返回结构。
+
++ 异步复制：如上文所述
+
++ 半同步复制：不用等待所有的从库复制成功响应，只要一部分复制成功响应回来就行
+
+
+
+**binlog的持久化**
+
+事务执行过程中，先把日志写到Server 层的 binlog cache，事务提交的时候，再把 binlog cache 写到 binlog 文件中。
+
+一个事务的 binlog 是不能被拆开的，因此无论这个事务有多大（比如有很多条语句），也要保证一次性写入。
+
+可以通过sync_binlog参数来控制binlog的刷盘频率
+
++ sync_binlog=0，提交事务时只write（写到page cache），不fsync，由操作系统决定调用fsync的时间
++ sync_binlog=1，提交事务时write，并且马上fsync
++ sync_binlog=N（N>1），提交事务时write，积累N个事务后fsync
 
 
 
 
-## 查询日志(querylog)
+
+**redo log和bin log的区别**
+
++ 适用对象不同
+  + redo log是innodb引擎自己实现的，别的存储引擎不能用
+  + bin log在MySQL Server层实现，所有引擎都能用
++ 粒度【所以在恢复速度上有区别，记录物理操作的恢复速度会快一点】
+  + redo log记录的是在某数据页进行的修改，比如对 XXX 表空间中的 YYY 数据页 ZZZ 偏移量的地方做了AAA 更新。记录的是物理操作
+  + bin log有三种记录模式。记录的是逻辑操作，比如：在**表xx**中插入了xx数据
++ 写入方式【所以binlog可以实现主从复制，而redo log就不行】
+  + redo log是循环写，写满了就从头开始写
+  + bin log是追加写，写满了文件就新建一个文件继续写
++ 用途
+  + redo log 用于掉电之后的恢复
+  + bin log 用于备份恢复，主从复制【binlog没有自动crash-safe能力，crash-safe指的是mySQL服务器宕机重启之后可以保证所有已经提交事务的数据仍然存在，所有没有提交事务的数据自动回滚】
+
+
+
+<font size=5>**两阶段提交**</font>
+
+**为什么需要两阶段提交？**
+
+主库是靠redo log来实现数据恢复的，从库是靠bin log来实现主从复制的。由于redo log和bin log不是同时写入磁盘的，如果他们其中一个写入后发生mySQL的崩溃，另外一个还没来得及写入磁盘。此时就会出现主从数据不一致的问题。
+
+如果redo log写了，bin log没写，主库就是最新数据，从库就是旧数据。如果bin log写了，redo log没写，主库就是旧数据，从库就是最新数据。
+
+MySQL为了防止出现这样的情况，采用了【两阶段提交】的解决方案，这个方案可以保证多个逻辑操作要不全部成功，要不全部失败。
+
+
+
+**两阶段提交的过程**
+
+为了保证redo log和bin log的一致性，MySQL 会使用了**内部 XA 事务**分两阶段来实现事物的提交。这个过程会将redo log的写入拆分成两个步骤，prepare阶段和commit阶段（注意，这个只是阶段名，不要和commit操作混淆）
+
+1. 将内部事务的id写入redo log，并将redo log的状态设置为prepare。
+2. 将内部事务的id写入bin log，然后将redo log的状态设置为commit。
+
+MySQL重启后，会先按顺序扫描redo log，如果遇到状态为prepare的redo log，会去查找该redo log的内部事务id是否存在于binlog中。
+
+如果不存在，则回滚事务。如果存在，则提交事务。
+
+
+
+**两阶段提交的问题：**
+
++ IO次数多：redo log和bin log需要调用2次以上刷盘操作（说至少两次是因为事务没提交也会触发刷盘，比如说后台线程每隔一秒就进行一次的刷盘，还有redo log buffer占满一半之后的刷盘）。
+
++ 锁竞争激烈：两阶段提交虽然能够保证「单事务」两个日志的内容一致，但在「多事务」的情况下，却不能保证两者的提交顺序一致。【chy觉得是这样：如果有两个事务，分别是事务A和B，两个事务的redo log都已经刷盘了，但是事务B的bin log比事务A的先刷盘了，这个时候MySQL扫描redo log的时候就会发现bin log里没有事务A的内部事务id，从而将事务A回滚，但实际上此时事务A还没有提交】
+
+  在早期的 MySQL 版本中，通过使用 prepare_commit_mutex 锁来保证事务提交的顺序，在一个事务获取到锁时才能进入 prepare 阶段，一直到 commit 阶段结束才能释放锁，下个事务才可以继续进行 prepare 操作
+
+
+
+**组提交：**
+
+为了避免IO次数过多，MySQL 引入了 binlog 组提交（group commit）机制，当有多个事务提交的时候，会将多个 binlog 刷盘操作合并成一个。引入这个机制之后，多个事务对应的binlog会按照被提交的顺序进入队列，
+
+## 查询日志(query log)
 
 是一种记录数据库服务器接收到的查询请求的日志。它记录了每个查询请求的详细信息，包括查询语句、执行时间、执行结果等
 

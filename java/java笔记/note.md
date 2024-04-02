@@ -148,7 +148,7 @@ this就是一个对象，用在方法中来拿到当前对象。
 
 ## Java基本数据类型
 
-### 内置数据类型（6+1+1）
+<font size=5>**内置数据类型（6+1+1）**</font>
 
 + byte：8位、有符号、以二进制补码表示的整数；表示范围为（-128,127），默认值是0，用于大型数组中节约空间。
 + short：16位、有符号、以二进制补码表示的整数；表示范围为（-32768，32767），默认值是0，也可以像 byte 那样节省空间。
@@ -167,7 +167,7 @@ this就是一个对象，用在方法中来拿到当前对象。
 
 
 
-### 引用数据类型
+<font size=5>**引用数据类型**</font>
 
 引用，数组，都是引用数据类型，其默认值都是null。一个引用变量可以用来引用任何与之兼容的类型
 
@@ -177,13 +177,13 @@ Site site = new Site("Runoob")
 
 
 
-### Java常量
+<font size=5>**Java常量**</font>
 
 在java中用final关键字来修饰常量，声明方式与变量类似，常量名通常用大写字母表示
 
 
 
-### 自动类型转换
+<font size=5>**自动类型转换**</font>
 
 转换等级从低到高：
 
@@ -232,7 +232,7 @@ type identifier [ = value][, identifier [= value] ...] ;
 
 
 
-### 局部变量
+<font size=5>**局部变量**</font>
 
 - 局部变量在方法、构造方法、或者语句块被执行的时候创建，当它们执行完成后，变量将会被销毁。
 - 局部变量只在声明它的方法、构造方法或者语句块中可见，不能被其他方法或代码块访问。
@@ -247,7 +247,7 @@ type variableName
 
 
 
-### 静态变量
+<font size=5>**静态变量**</font>
 
 + 静态变量在类加载时被创建，在整个程序运行期间都存在。
 + 由于静态变量是与类相关的，因此可以通过类名来访问静态变量，也可以通过实例名来访问静态变量
@@ -257,7 +257,7 @@ type variableName
 
 
 
-### 成员变量
+<font size=5>**成员变量**</font>
 
 + 当一个对象被实例化之后，每个成员变量的值就跟着确定。
 + 成员变量的值应该至少被一个方法、构造方法或者语句块引用，使得外部能够通过这些方式获取实例变量信息。
@@ -269,7 +269,7 @@ accessModifier type variableName;
 
 
 
-### 参数变量
+<font size=5>**参数变量**</font>
 
 参数变量与局部变量类似，但它们只在方法或构造函数被调用时存在，并且只能在方法或构造函数内部使用。
 
@@ -282,7 +282,7 @@ accessModifier type variableName;
 
 ## Java修饰符
 
-### 访问控制修饰符
+<font size=5>**访问控制修饰符**</font>
 
 | 访问权限  | 可见性                       | 适用对象             | 备注           |
 | --------- | ---------------------------- | -------------------- | -------------- |
@@ -291,7 +291,7 @@ accessModifier type variableName;
 | public    | 对所有类可见                 | 类、接口、变量、方法 |                |
 | protected | 对同一包内的类和所有子类可见 | 变量、方法           | 不能修饰外部类 |
 
-### 非访问修饰符
+<font size=5>**非访问修饰符**</font>
 
 + static
 
@@ -331,7 +331,7 @@ accessModifier type variableName;
 
 ## String
 
-### 注意事项
+<font size=5>**注意事项**</font>
 
 1. String的对象是不可变的：字符串每次进行值更改的时候，实际上都是产生了新的字符串对象
 2. 以“...”写出的字符串对象会存储到字符串常量池中，且相同内容的字符串只会存储一份
@@ -339,7 +339,7 @@ accessModifier type variableName;
 
 
 
-### 常见构造器
+<font size=5>**常见构造器**</font>
 
 1. public String()：String name = new String();
 2. public String(String original): String name = new String("heiheihiehi");
@@ -348,7 +348,7 @@ accessModifier type variableName;
 
 
 
-### 常见方法
+<font size=5>**常见方法**</font> 
 
 + int length
 + char charAt
@@ -368,7 +368,7 @@ accessModifier type variableName;
 
 ## ArrayList
 
-### 常见方法
+<font size=5>**常见方法**</font>
 
 + public boolean add(E e)
 + public void add(int index, E element)
@@ -480,7 +480,7 @@ public class A{
 
     
 
-### 继承相关的注意事项
+<font size=5>**继承相关的注意事项**</font>
 
 **权限修饰符**：用于限制类中成员能够被访问的范围
 
@@ -560,7 +560,7 @@ Public class Student extends People{
 
 
 
-### 多态的好处
+<font size=5>**多态的好处**</font>
 
 + 在多态形势下，右边对象是解耦合的，更便于扩展和维护
 
@@ -626,14 +626,14 @@ final如果修饰引用类型的变量，变量存储的地址不能被改变，
 
 
 
-### 接口的好处
+**接口的好处**
 
 + 弥补了类单继承的不足（一个类可以实现多个
 + 让程序可以面向接口编程，方便切换业务实现
 
 
 
-### JDK8开始，接口中新增的三种方法
+**JDK8开始，接口中新增的三种方法**
 
 + 默认方法：必须使用default修饰，默认会被public修饰（必须使用实现类的方法来调用，因为接口没有对象）
 + 私有方法：必须使用private修饰（JDK9开始支持）（只能在接口内部访问）
@@ -645,7 +645,7 @@ final如果修饰引用类型的变量，变量存储的地址不能被改变，
 
 
 
-### 接口的多继承
+**接口的多继承**
 
 一个接口可以同时继承多个接口，便于实现类去实现
 
@@ -805,103 +805,135 @@ public enum A{
 
 ## 泛型
 
-泛型是一种编程范式，它允许在定义类、接口和方法时使用类型参数，在编译阶段约束操作的类型。
+参考：https://www.cnblogs.com/XiiX/p/14719568.html
 
-泛型的本质：把具体的数据类型作为参数传给类型变量
+泛型是一种编程范式，它允许在定义类、接口和方法时不预先指定具体的类型，而在使用的时候再指定一个类型。编写泛型就相当于编写一个模板。按照官方的说法，泛型指的就是“参数化类型”。
 
-例子：
+ArrayList就是一个使用了泛型的典型案例：
 
-```java
-ArrayList<String> list1 = new ArrayList<String>();
-ArrayList<String> list1 = new ArrayList<>();//jdk1.7开始支持，后面的数据类型可以不声明
-```
+​	public class ArrayList<E> extends AbstractList<E>
 
-
-
-### 泛型类
-
-```
-修饰符 class 类名<类型变量，类型变量，...>{
-
-}//尖括号里的内容可以写一个类型变量（E），也可以写多个（E，T），也可以进行进一步限定（E extends T）
-```
-
-
+所以ArrayList中可以存各种类型的元素，如果不使用泛型来定义ArrayList类的话，就需要写出诸如StringArrayList，IntegerArrayList...等许许多多的类。这显然不是很现实。
 
 ```java
-public class MyArrayList<E>{
-	public boolean add(E e){
-		return true;
+//泛型类例子
+public class Info<T...>{
+	//尖括号里的内容可以写一个类型变量（K），也可以写多个（E，T），也可以进行进一步限定（E extends T）
+    private T first;
+    public T getFirst() { 
+    	return first;
+    }
+}
+
+//泛型接口例子
+public interface Info<K,T ...>{
+	//尖括号里的内容可以写一个类型变量（E），也可以写多个（E，T），也可以进行进一步限定（E extends T）
+    T text();
+}
+
+//泛型方法例子
+//是否拥有泛型方法，与其所在的类是否是泛型没有关系。
+public <T> T info(T Obj...){
+
+}
+
+```
+
+---------
+
+**类型通配符**：在使用泛型的时候可以代表一切类型
+
++ 无界通配符：？
+
++ 上界通配符：<？extends B1 & B2 & B3>
+  + ？必须是B1的子类（或者实现类），且必须是B2，B3的实现类【因为单继承，所以不可能同时是三个类的子类】
+
++ 下界通配符：<？ super Car>
+  + ？必须是Car或Car的父类
+
+------------
+
+**泛型擦除：**虚拟机对泛型其实一无所知，所有的工作都是编译器做的。
+
+Java中的泛型被称为“伪泛型”，这是因为在编译器中，泛型信息会被擦除（Type Erasure），从而在生成的字节码中不再包含泛型的类型信息。比如说，一个List<T> 泛型类在编译后会变成原始类List
+
+泛型不支持基本数据类型，只能支持对象类型（引用数据类型）。如果要用基本数据类型，就要改成使用对应的对象类型。
+
+泛型擦除分为无限制类型擦除和有限制类型擦除。无限制类型擦除会直接将类型擦除为Object，有限制类型擦除会将类型擦除为指定的类型边界。【无限制就是一下子擦到老祖宗，有限制就是擦到爹】
+
+
+
+**为什么要使用泛型擦除？**
+
+简单来说，就是为了简单。
+
+引入泛型擦除机制之后，可以更好地实现代码兼容。同时也可以减少运行时的类型检查的复杂性和开销，降低生成字节码的复杂性，提高安全性。
+
+如果不引入泛型擦除，那么老版本的Java代码就无法和新版本的兼容，比如说对于一个ArrayList<Integer>类型的类，如果不引入泛型擦除，它就会被编译成一个ArrayList<Integer>类，引入泛型擦除之后就是ArrayList类，和老版本保持一致。
+
+
+
+**桥接方法**
+
+当一个泛型类或接口继承或实现另一个泛型类或接口时，由于类型擦除的原因，可能会导致在子类或实现类中出现潜在的类型不匹配问题。为了解决这个问题，编译器会自动生成桥接方法来确保类型安全。
+
+简单来说就是，按照接口的实现规则，实现类需要重写接口的方法，但是接口的方法被擦除了类型，变成了Object类型，此时实现类为了满足接口和实现类之间的规则，必须重写接口类型为Object的方法。
+
+```java
+//接口
+public interface Info<T>{
+	T info(T var);
+}
+
+//实现类
+public class InfoImpl implements Info<Integer>{
+	@Override //注意这个@Override
+	public Integer info(Integer var){
+		return var;
 	}
-	public E get(int index){
-		return null;
+}
+```
+
+```java
+//类型擦除后
+public interface Info{
+	Object info(Object var);
+}
+
+//编译器自动为实现方法创建一个桥接方法，确保类型安全
+public class InfoImpl implements Info{
+	//！！！！！！！！@Override没有了！！！！！！
+	public Integer info(Integer var){
+		return var;
+	}
+	
+	@Override//注意这个@Override
+	public Object info(Object var){
+		return info((Integer) var);
 	}
 }
+
 ```
 
+-----------
 
+**泛型的优点：**
 
-### 泛型接口
-
-```java
-修饰符 interface 接口名<类型变量，类型变量，...>{
-
-}//尖括号里的内容可以写一个类型变量（E），也可以写多个（E，T），也可以进行进一步限定（E extends T）
-```
-
-```java
-public class TeacherData implements Data<Teacher>{//实现的时候在这里指明接口要处理的数据类型
-
-}
-```
++ **可以使用更通用的算法**。对于不同的数据类型可以使用模板方法，避免代码的重复编写
++ **编译时会有更强的类型检查**。Java编译器会对泛型进行强类型检查，如果类型和声明的类型不一致时会报错，如果不使用泛型，编译器可能就检查不到这个错误，要等运行时才能发现。
++ **消除类型转换**。当没有使用泛型时，对于List list = new ArrayList(); list.add("hello")；取出list中的元素的时候，需要将其进行一个强制类型转换，因为从静态类型List中取出元素时，它的类型被视作Object。如果给list指明了类型String，取出元素时就无需进行类型转换。
 
 
 
-### 泛型方法
+**泛型的缺点：**
 
-```java
-修饰符 <类型变量，类型变量,...> 返回值类型 方法名(形参列表){
++ 其他缺点
+  + 不能直接使用泛型类型参数作为静态方法的类型或参数。因为泛型类型参数是在实例化时确定的，而静态方法不依赖于实例化对象。
 
-}
-```
-
-```java
-public static void main(String args[]){
-	ArrayList<Car> cars = new ArrayList<>();
-	cars.add(new Car());
-	go(cars);//这里不会报错，因为go方法里ArrayList的类型是Car
-	ArrayList<BMW> bmw = new ArrayList<>();// BMW是Car的子类
-	bmw.add(new BMW());
-	go(bmw);//会报错，因为go方法里ArrayList的类型是Car,即使BMW继承了Car也不行
-}
-
-
-
-public static void go(Arraylist<Car> cars){
-
-}
-```
-
-？：通配符，在**使用**泛型的时候可以代表一切类型
-
-上限继承：？extends Car（？必须是Car或Car的子类）
-
-下限继承：？ super Car（？必须是Car或Car的父类）
-
-
-
-
-
-### 泛型擦除
-
-1. 泛型是工作在编译阶段的，一旦程序编译成class文件，class文件中就不存在泛型了，这就是泛型擦除
-2. 泛型不支持基本数据类型，只能支持对象类型（引用数据类型）。如果要用基本数据类型，就要改成使用对应的对象类型
-
-
-
-
-
-
++ 泛型擦除带来的缺点
+  + 不能用基本数据类型。因为泛型会被擦除为Object，而基本数据类型的父类不是Object
+  + 不能使用Instance of 和getClass()进行类型判断。得到的都是被擦除之后的类型。
+  + 不能实现两个不同泛型参数的同一接口。如果实现了同一个接口，他们各自都会生成桥接方法，桥接方法之间会产生冲突。
 
 # 常用API（二）
 
@@ -2168,15 +2200,13 @@ Object[] toArray();
 
 
 
-# File, IO流
+
+
+
+
+# File
 
 File类：File类只能对文件本身进行操作，不能读写文件里面存储的数据
-
-IO流：用于读写数据
-
-
-
-## File
 
 ```Java
 //创建一个File对象
@@ -2195,7 +2225,7 @@ public File(File parent, String child);
 
 
 
-### File类的常用方法
+## File类的常用方法
 
 **判断文件类型，获取文件信息：**
 
@@ -2265,7 +2295,7 @@ public File[] listFiles();
 
 
 
-### 文件搜索
+## 文件搜索
 
 1. 把非法的情况进行拦截（路径为空，路径不存在，路径是文件）
 2. 获取dir下的一级文件对象
@@ -2275,9 +2305,11 @@ public File[] listFiles();
 
 
 
-## IO
+# IO
 
-### 字符集
+IO流：用于读写数据
+
+## 字符集
 
 **标准ASCII字符集**：使用1个字节存储一个字符，首尾是0，总共可以表示128个字符
 
@@ -2310,7 +2342,7 @@ String(byte[] bytes,String charsetName);
 
 
 
-### IO流
+## IO流
 
 **按流的方向分：**
 
@@ -2351,7 +2383,7 @@ String(byte[] bytes,String charsetName);
 
 
 
-#### FileInputStream
+**FileInputStream**
 
 **创建对象：**
 
@@ -2420,7 +2452,7 @@ public byte[] readAllBytes() throws IOException
 
 
 
-#### FileOutputStream
+**FileOutputStream**
 
 **创建对象：**
 
@@ -2460,7 +2492,7 @@ public void close() throws IOException;
 
 
 
-#### FileReader
+**FileReader**
 
 **创建对象：**
 
@@ -2487,7 +2519,7 @@ public int read(char[] buffer)
 
 
 
-#### FileWriter
+**FileWriter**
 
 **字符输出流写出数据后，必须刷新流，或者关闭流，写出去的数据才能生效！！！！！！**这是因为为了提高性能，输出流会把数据先都写入缓冲区，最后再将缓冲区中的数据存入到文件中去，这样能减少系统调用的次数提高性能。只有进行filewriter.flush()或者filewriter.close()，才会自动将缓冲区中的内容写入文件。
 
@@ -2532,7 +2564,7 @@ public void write(char[] buffer, int pos, int len)
 
 
 
-### try-catch-finally && try-with-resource
+**try-catch-finally && try-with-resource**
 
 ```
 创建流
@@ -2576,7 +2608,7 @@ try(
 
 
 
-### 缓冲流
+## 缓冲流
 
 对原始流进行包装，以提高原始流读写数据的性能。
 
@@ -2587,7 +2619,7 @@ try(
 
 
 
-### 转换流
+## 转换流
 
 如果代码编码和被读取的文件文本的编码是一致的，使用字符流读取文本文件时不会出现乱码；如果不是一致的，使用字符流读取的时候会出现乱码
 
@@ -2599,7 +2631,7 @@ try(
 
   
 
-### 打印流
+## 打印流
 
 提供更加方便，高效的打印方法
 
@@ -2897,9 +2929,9 @@ void notifyAll()
 
 
 
-### 方式一
+<font size=5>**方式一**</font>
 
-#### ExecutorService实现类的参数及注意事项
+**ExecutorService实现类的参数及注意事项**
 
 ```Java
 public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,ThreadFactory threadFactory, RejectedExecutionHandler handler)
@@ -2927,7 +2959,7 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
    
 
-#### ExecutorService常用方法
+**ExecutorService常用方法**
 
 ```java
 Runnable target = new MyRunnable();
@@ -2947,18 +2979,18 @@ List<Runnable> shutdownNow()
 
 
 
-#### 新任务拒绝策略
+**新任务拒绝策略**
 
 + ThreadPoolExecutor.AbortPolicy：默认策略，丢弃任务抛异常
 + ThreadPoolExecutor.DiscardPolicy：丢弃任务不抛异常
 + ThreadPoolExecutor.DiscardOldestPolicy：抛弃队列中等待最久的任务
 + ThreadPoolExecutor.CallerRunsPolicy：主线程调用任务的run方法，绕过线程池直接执行
 
+-----------------
 
+<font size=5>**方式二**</font>
 
-### 方式二
-
-#### Executors的常用方法
+**Executors的常用方法**
 
 ```Java
 //底层还是基于ThreadPoolExecutor实现的
@@ -2981,7 +3013,7 @@ public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
 
 
 
-#### 线程的状态
+**线程的状态**
 
 + NEW（新建）：刚被创建但未启动
 + Runnable（可运行）：线程调用了start（），等待cpu调度
@@ -3011,7 +3043,7 @@ public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
 
 
 
-## 网络通信的常见概念
+**网络通信的常见概念**
 
 端口号：用于标记正在计算机设备上运行的应用程序，被规定为一个16位的二进制，范围是0~65535
 
@@ -3044,7 +3076,7 @@ public boolean isReachable(int timeout)
 
 ## UDP通信
 
-### UDP基本操作
+**UDP基本操作**
 
 java.net.DatagramSocket
 
@@ -3077,7 +3109,7 @@ public int getLength()
 
 
 
-### UDP多发多收
+**UDP多发多收**
 
 ```java
 //用户端
@@ -3139,7 +3171,7 @@ public Socket accept()
 
 
 
-### TCP多发多收
+**TCP多发多收**
 
 基本实现方法和UDP差不多，需要额外添加异常捕获。因为TCP是可靠连接，当客户端离线了，服务端在监听时能检测到，此时会抛出异常。
 
@@ -3162,7 +3194,7 @@ public Socket accept()
 
 针对最小的功能单元，编写测试代码对其进行正确性测试
 
- ### Junit
+<font size=5>**Junit**</font>
 
 **优点：**
 
@@ -3215,7 +3247,7 @@ java.lang.reflect
 
 
 
-### 获取类对象
+<font size=5>**获取类对象**</font>
 
 + 方法一：Class c = 类名.class
 + 方法二：调用Class提供方法：public static Class forName(String package);
@@ -3223,7 +3255,7 @@ java.lang.reflect
 
 
 
-### 获取构造函数
+<font size=5>**获取构造函数**</font>
 
 ```Java
 //获取全部public构造器
@@ -3239,7 +3271,9 @@ Constructor<T> getConstructor(Class<?>... parameterTypes)
 Constructor<T> getDeclaredConstructor(Class<?>... parameterTypes)
 ```
 
-### 获取成员变量
+
+
+<font size=5>**获取成员变量**</font>
 
 ```Java
 //获取全部public成员变量
@@ -3268,7 +3302,7 @@ public void setAccessible(boolean flag);
 
 
 
-### 获取成员方法
+<font size=5>**获取成员方法**</font>
 
 ```Java
 //获取全部public成员方法
@@ -3330,7 +3364,7 @@ public interface MyTest1 extends Annotation{
 
 
 
-### 元注解
+<font size=5>**元注解**</font>
 
 修饰注解的注解
 
@@ -3357,7 +3391,7 @@ public interface MyTest1 extends Annotation{
 
 
 
-### 注解的解析
+<font size=5>**注解的解析**</font>
 
 **注解的解析：**判断类、方法、成员变量上是否存在注解，若存在则将内容解析出来
 
