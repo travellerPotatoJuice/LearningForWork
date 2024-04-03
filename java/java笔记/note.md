@@ -54,7 +54,7 @@ ALT + SHIFT + 上，ALT + SHIFT + 下：上下移动当前代码
 
 ## 对象和类
 
-### 类：具备某些共同特征的实体的集合
+**类：具备某些共同特征的实体的集合**
 
 
 
@@ -71,7 +71,7 @@ ALT + SHIFT + 上，ALT + SHIFT + 下：上下移动当前代码
 
 
 
-### 创建对象
+**创建对象**
 
 1. 声明：声明一个对象，包括其名称和类型
 2. 实例化：用关键字new创建一个对象
@@ -91,7 +91,7 @@ public class Puppy{
 
 
 
-### 访问实例变量和方法
+**访问实例变量和方法**
 
 ```
 /* 实例化对象 */
@@ -104,7 +104,7 @@ referenceVariable.methodName();
 
 
 
-### 源文件声明规则
+**源文件声明规则**
 
 1. 一个源文件中只能有一个 public 类，且名称应与public 类的类名保持一致
 
@@ -138,7 +138,7 @@ referenceVariable.methodName();
 
    
 
-### this
+**this**
 
 this就是一个对象，用在方法中来拿到当前对象。
 
@@ -676,7 +676,7 @@ final如果修饰引用类型的变量，变量存储的地址不能被改变，
 
 
 
-### 成员内部类
+**成员内部类**
 
 **创建方式**：外部类名.内部类名  对象名 = new 外部类().内部类();
 
@@ -693,7 +693,7 @@ inner.show();
 
 
 
-### 静态内部类
+**静态内部类**
 
 **创建方式：**外部类名.内部类名  对象名 = new 外部类.内部类();
 
@@ -709,7 +709,7 @@ inner.show();
 
 
 
-### 匿名内部类
+**匿名内部类**
 
 继承了 父类/接口 并重写 父类/接口 的某方法，使用new创建出没有名字但继承父类的子类
 
@@ -780,7 +780,7 @@ public enum A{
 
 
 
-### 抽象枚举
+**抽象枚举**
 
 在枚举类中定义了一个抽象方法，因此在第一行罗列对象的时候不能直接创建对象了，需要对抽象方法进行重写
 
@@ -847,9 +847,11 @@ public <T> T info(T Obj...){
 
 + 上界通配符：<？extends B1 & B2 & B3>
   + ？必须是B1的子类（或者实现类），且必须是B2，B3的实现类【因为单继承，所以不可能同时是三个类的子类】
-
++ 只能读，不能写【因为可以确定返回的类型的上界，所以可以读。但是写的时候无法确认是哪种类型】
+  
 + 下界通配符：<？ super Car>
   + ？必须是Car或Car的父类
+  + 只能写，不能读【因为可以确定写入元素的下界，所以可以写。但是读的时候无法确认是哪种类型】
 
 ------------
 
@@ -947,7 +949,7 @@ Cloneable接口：是一个标记接口，它指示实现了这个接口的类�
 
 
 
-### 浅克隆
+**浅克隆**
 
 浅克隆后的新对象和原始对象共享引用类型字段所指向的对象，对其中一个对象所做的修改会影响另一个对象
 
@@ -962,7 +964,7 @@ Cloneable接口：是一个标记接口，它指示实现了这个接口的类�
 
 
 
-### 深克隆
+**深克隆**
 
 深克隆后的新对象和原始对象完全独立，对任意一个对象的修改都不会影响另一个对象。
 
@@ -1304,7 +1306,7 @@ public void add(int field, int amount);
 
 ## JDK8之后新增的日期和时间
 
-### LocalDate，LocalTime，LocalDateTime，ZoneId, ZonedDateTime（用于代替Calendar）
+**LocalDate，LocalTime，LocalDateTime，ZoneId, ZonedDateTime（用于代替Calendar）**
 
 LocalDate：表示本地日期（年，月，日，星期）
 
@@ -1350,7 +1352,7 @@ LocalDateTime ldt = LocalDateTime.now();
 
 
 
-### Period
+**Period**
 
 可以计算两个LocalDate对象相差的年数，月数，天数
 
@@ -1370,7 +1372,7 @@ public int getDays();
 
 
 
-### Duration
+**Duration**
 
 支持**LocalTime，LocalDateTime，Instant**。可以计算两个时间对象相差的天数，小时数，分数，秒数，毫秒数，纳秒数。
 
@@ -1399,7 +1401,7 @@ public long toNanos();
 
 
 
-### Instant（用于代替Date）
+**Instant（用于代替Date）**
 
 获取从1970-01-01 00:00:00开始走到此刻的总秒数+不够1秒的纳秒数。
 
@@ -1420,7 +1422,7 @@ public int getNano();
 
 
 
-### DateTimeFormatter（用于代替SimpleDateFormat）
+**DateTimeFormatter（用于代替SimpleDateFormat）**
 
 SimpleDateFormat是线程不安全的
 
@@ -2745,115 +2747,72 @@ public static final Logger LOGGER = LoggerFactory.getLogger("LogBackTest")
 
 # 多线程
 
-**概念**：从软件或者硬件上实现多个线程并发执行的技术
+## 基本概念
 
-**多线程注意事项**：
+**进程&线程&多线程：**
 
-+ 启动线程是调用start方法而不是run方法，调用run方法的话会被当成普通的java对象（会先跑完子线程任务再执行主线程）
-+ 不要把主线程任务放在启动子线程之前（会先跑完主线程任务再执行子线程）
++ 进程：是计算机中正在运行的程序的实例，是**资源分配的最小单位**。进程之间是相互独立的，它们有各自独立的内存空间和资源，不会互相影响。
++ 线程：是操作系统**调度的最小单位**。每个线程有自己的程序计数器、虚拟机栈、本地方法栈，但多个线程共享进程的堆和方法区。
 
-**创建线程的方案**：
++ 多线程：从软件或者硬件上实现多个线程并发执行的技术。
 
-1. 将类继承为Thread的子类，重写run方法
-   + 缺点：由于Java是单继承的，继承了Thread类之后就不能继承其他类了。
-2. 让类实现Runnable接口
-3. 利用Callable接口，FutureTask类来实现。这种实现方式可以返回线程执行完毕后的结果
-   1. 定义一个类实现Callable接口，重写call方法
-   2. 把Callable类型的对象封装成FutureTask（线程任务对象）
-   3. 将线程任务对象交给Thread
-   4. 调用Thread的start方法启动线程
-   5. 线程执行完毕后通过FutureTask对象的get方法获取线程任务执行的结果
+  在单核时代，实现多线程能有效提高单个CPU的利用率，当一个线程因为IO被阻塞时，另外一个线程可以接手CPU运行。
 
+  在多核时代，实现多线程可以有效利用多个CPU核心，提高任务执行的效率。
 
+  
 
-```Java
-//方法一
-public class MyThread extends Thread{
-    @Override 
-    public void run(){
-        
-    }
-}
-```
+**线程的生命周期：**
 
-```Java
-//方法二
-public class MyRunnable implements Runnable{
-    @Override //重写Runnable的run方法
-    public void run(){
-       
-    }
-}
-
-Runnable target = new MyRunnable();
-new Thread(target).start();
-```
-
-```Java
-//方法三
-public class MyCallable implements Callable<String> {
-    private int n;
-    public MyCallable(int n){
-        this.n =n;
-    }
-    
-    @Overrride
-    public String call() throws Exception{
-        xxx
-        return xx;
-    }
-}
-
-Callable<String> call  = new MyCallable(100);
-FutureTask<String> f1 = new FutureTask<>(call);//封装成FutureTask对象
-new Thread(f1).start();
-String result = f1.get();//这个地方可能需要抛出一下异常
-```
++ new：初始状态。线程被创建了，但还没有开始执行
++ runnable：运行状态。分成运行中（running）和就绪（ready）状态。【操作系统层面是可以看到running和ready状态的，但是jvm层面只能看到runnable状态】
++ blocked：阻塞状态。正在等待某些资源，比如说IO操作完成，锁被释放等等。
++ waiting：等待状态。等待其他线程发出通知或者特定条件满足才会结束该状态。
++ time_waiting：类似于等待状态，但是一段时间后会自动恢复。
++ terminated：终止状态。线程一旦进入终止状态，就不能再次启动或执行任务。
 
 
 
-## Thread提供的线程操作的方法
+**多线程一定会提高效率吗？**
 
-**构造器：**
+不一定！！！
 
-```Java
-//创建线程时直接为其 取名
-public Thread(String name);
+如果是CPU密集型任务，使用多线程需要在不同线程之间频繁地切换，而线程切换也是有开销的，这个时候使用多线程反而会降低效率
 
-public Thread(Runnable target);
-
-public Thread(Runnable target, String name)
-```
+如果是IO密集型任务，使用多线程可以在一个线程被IO阻塞的时候充分利用CPU，此时会提高运行的效率
 
 
 
-**常用方法：**
+--------------
 
-```Java
-public void run();
+**死锁的必要条件：**
 
-//启动线程
-public void start();
-
-//获取线程名字
-public String getName();
-
-//设置获取线程名字。默认线程名称是Thread-x，主线程名字是main
-public void setName(String name);
-
-//获取当前执行的线程。
-public static Thread currentThread();
-
-//让当前执行的线程暂停一段时间
-public static void sleep(long time);
-
-//让当前调用这个方法的线程先执行完
-public final void join();
-```
++ 互斥：该资源只能同时被一个线程占用
++ 请求与保持：线程获取资源后若被阻塞，不会释放已获得的资源
++ 不可剥夺：线程获取资源后不能被别的线程剥夺已获得的资源
++ 循环等待：若干个线程之间相互等待别的线程释放资源
 
 
 
-## 线程同步
+**预防和避免死锁：**
+
++ 预防死锁：
+
+  + 破坏请求与保持条件：一次性获取所有需要的资源
+
+  + 破坏不可剥夺条件：占用资源的线程获取不到资源的时候，主动释放已经获取到的资源
+
+  + 破坏循环等待：按顺序申请资源
+
+    【线程A和线程B都需要获取资源1和资源2，如果不按顺序申请，线程A获取了资源1，线程B获取了资源2，然后他们就会陷入对对方持有资源的等待中。但如果按顺序申请资源，线程A和线程B都会先去申请资源1，假设线程A获取了资源1，线程B就会直接进入等待，而不会去申请资源2占用线程A需要的后续资源】
+
++ 避免死锁：
+
+  + 银行家算法：在资源分配时，借助于算法对资源分配进行计算评估，使其进入安全状态。
+
+--------------
+
+**线程同步**
 
 **线程安全：**在拥有**共享数据**的**多条线程**并行执行的程序中，线程安全的代码会通过同步机制保证各个线程都可以正常且正确的执行。
 
@@ -2896,7 +2855,7 @@ lk.unlock();  //该操作最好放在finally里进行。确保无论是否正确
 
 
 
-## 线程通信
+**线程通信**
 
 **概念：**当多个线程共同操作共享资源时，线程之间通过某种方式互相告知自己的状态，从而实现协同工作
 
@@ -2914,6 +2873,114 @@ void notifyAll()
 
 
 
+## Thread类
+
+**构造器：**
+
+```Java
+//创建线程时直接为其取名
+public Thread(String name);
+
+public Thread(Runnable target);
+
+public Thread(Runnable target, String name)
+```
+
+
+
+**常用方法：**
+
+```Java
+//要重写这个方法，但是调用的时候不能直接调用这个方法，否则就和调用一个普通方法没有区别
+public void run();
+
+//启动线程
+public void start();
+
+//获取线程名字
+public String getName();
+
+//设置获取线程名字。默认线程名称是Thread-x，主线程名字是main
+public void setName(String name);
+
+//获取当前执行的线程。
+public static Thread currentThread();
+
+//让当前执行的线程暂停一段时间
+public static void sleep(long time);
+
+//让当前调用这个方法的线程先执行完
+public final void join();
+```
+
+
+
+## 线程创建方式
+
+1. **基于Thread类【无返回值】**：继承Thread类，重写run方法【任务和线程是耦合的】
+   
+   + 缺点：由于Java是单继承的，继承了Thread类之后就不能继承其他类了。
+   
+   ```java
+   //方法一
+   public class MyThread extends Thread{
+       @Override 
+       public void run(){
+           
+       }
+   }
+   
+   //主函数里写的内容
+   MyThread myThread1 = new MyThread();
+   MyThread myThread2 = new MyThread();
+   myThread1.start();
+   myThread2.start();
+   ```
+   
+2. **基于Runnable接口【无返回值】**：实现Runnable接口作为任务类，实现run方法。创建Thread对象，填入任务类对象。【任务和线程是分开的，一个任务可以被多个线程执行】
+
+   ```java
+   //方法二
+   public class MyRunnable implements Runnable{
+       @Override //重写Runnable的run方法
+       public void run(){
+          
+       }
+   }
+   //主函数里写的内容
+   Runnable target = new MyRunnable();
+   Thread t1 = new Thread(target);
+   Thread t2 = new Thread(target);
+   t1.start();
+   t2.start();
+   ```
+
+3. **基于Callable接口【有返回值】**：实现Callable**泛型接口**，类型指定为需要的返回值类型，实现call()方法。传入的类型和接收的类型都是FutureTask<T>类型
+
+   ```java
+   //方法三
+   public class MyCallable implements Callable<Integer> {    
+       @Overrride
+       public Integer call() throws Exception{
+           int sum = 0;
+           for(int i=0;i<100;i++){
+               sum+=i;
+           }
+           return sum;
+       }
+   }
+   
+   MyCallable mc = new MyCallable();
+   FutureTask<Integer> f1 = new FutureTask<>(mc);//封装成FutureTask对象
+   Thread t1 = new Thread(f1);
+   t1.start();
+   Integer result = f1.get();
+   ```
+
+4. **基于线程池**：在后面详细解释
+
+【不管哪种方法，其实归根结底都是通过new Thread().start()来创建；实现Runnable，Callable接口都是创建了线程体，然后提供给Thread运行。线程相当于容器，线程体是里面可以执行的任务】
+
 
 
 ## 线程池
@@ -2924,44 +2991,38 @@ void notifyAll()
 
 **如何获得线程池对象：**
 
-+ 方式一：使用ExecutorService的实现类ThreadPoolExecutor创建一个线程池对象
-+ 方式二：使用Executors(线程池的工具类)返回不同特点的线程池对象
++ 方式一：基于Executors(线程池的工具类)创建
+
++ 方式二：基于ExecutorService的实现类ThreadPoolExecutor创建一个线程池对象
 
 
 
-<font size=5>**方式一**</font>
-
-**ExecutorService实现类的参数及注意事项**
+<font size=5>**基于Executors获取线程池**</font>
 
 ```Java
-public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,ThreadFactory threadFactory, RejectedExecutionHandler handler)
+//底层还是基于ThreadPoolExecutor实现的
+//创建一个线程数无上限的线程池【实际上是有的，不过值很大很大】。如果线程执行完毕且空闲了60s,会回收掉线程
+public static ExecutorService newCachedThreadPool()
+
+//创建一个线程数有上限的线程池。如果提交的任务数超过上限，任务就会进入队列等候
+public static ExecutorService newFixedThreadPool(int nThreads)
+
+//创建一个只有一个线程的线程池对象，若该线程出现异常，线程池会补充一个新线程。
+public static ExecutorService newSingleThreadExecutor()
+
+//创建一个线程池，可以在给定的延迟后运行任务会定期执行任务
+public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
 ```
 
-+ corePoolSize：指定线程池的核心线程数量
-+ maximumPoolSize：指定最大线程数量
-+ keepAliveTime：指定临时线程存活时间
-+ unit：临时线程存活时间的单位
-+ workQueue：线程池任务队列
-+ threadFactory：线程工厂
-+ handler：线程池拒绝策略
+
+
+**注意事项：**在大型并发系统环境中使用Executors创建线程池的话可能会出现系统瘫痪，在这种场景下不要随便用
 
 
 
-**注意事项：**
+<font size=5>**ExecutorService常用方法**</font>
 
-1. 临时线程什么时候创建
-
-   **新任务提交的时候**发现核心线程都在忙，任务列表满了，并且还可以创建临时线程
-
-2. 什么时候会拒绝新任务
-
-   核心线程和临时线程都在忙，任务队列满了，新的任务来时会拒绝任务
-
-   
-
-**ExecutorService常用方法**
-
-```java
+```
 Runnable target = new MyRunnable();
 
 //执行Runnable任务
@@ -2979,6 +3040,29 @@ List<Runnable> shutdownNow()
 
 
 
+---------------
+
+<font size=5>**基于ThreadPoolExecutor获取线程池**</font>
+
+```Java
+public ThreadPoolExecutor(
+    int corePoolSize, int maximumPoolSize, 
+    long keepAliveTime, TimeUnit unit, 
+    BlockingQueue<Runnable> workQueue,
+    ThreadFactory threadFactory, 
+    RejectedExecutionHandler handler)
+```
+
++ corePoolSize：线程池的核心线程数量
++ maximumPoolSize：最大线程数量
++ keepAliveTime：临时线程存活时间
++ unit：临时线程存活时间的单位
++ workQueue：线程池任务队列。必须是BlockingQueue的实现类，比如说ArrayBlockingQueue（容量固定），LinkedBlockingQueue（不指定容量的话容量就是无限的）
++ threadFactory：线程工厂
++ handler：线程池拒绝策略
+
+
+
 **新任务拒绝策略**
 
 + ThreadPoolExecutor.AbortPolicy：默认策略，丢弃任务抛异常
@@ -2986,45 +3070,24 @@ List<Runnable> shutdownNow()
 + ThreadPoolExecutor.DiscardOldestPolicy：抛弃队列中等待最久的任务
 + ThreadPoolExecutor.CallerRunsPolicy：主线程调用任务的run方法，绕过线程池直接执行
 
------------------
 
-<font size=5>**方式二**</font>
 
-**Executors的常用方法**
+**注意事项：**
 
-```Java
-//底层还是基于ThreadPoolExecutor实现的
-//创建一个固定核心线程数量的线程池，若某线程出现异常，线程池会补充一个新线程。
-public static ExecutorService newFixedThreadPool(int nThreads)
+1. **临时线程什么时候创建**
 
-//创建一个只有一个线程的线程池对象，若该线程出现异常，线程池会补充一个新线程。
-public static ExecutorService newSingleThreadExecutor()
+   新任务提交的时候发现核心线程都在忙，任务列表满了，并且还可以创建临时线程时会创建临时线程。也就是说，当一个新任务提交时
 
-//线程数量随任务增加而增加，如果线程执行完毕且空闲了60s,会回收掉线程
-public static ExecutorService newCachedThreadPool()
+2. 什么时候会拒绝新任务
 
-//创建一个线程池，可以在给定的延迟后运行任务会定期执行任务
-public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
-```
+   核心线程和临时线程都在忙，任务队列满了，新的任务来时会拒绝任务
 
 
 
-**注意事项：**在大型并发系统环境中使用Executors创建线程池的话可能会出现系统瘫痪，在这种场景下不要随便用
+**多线程注意事项**：
 
-
-
-**线程的状态**
-
-+ NEW（新建）：刚被创建但未启动
-+ Runnable（可运行）：线程调用了start（），等待cpu调度
-+ Blocked（锁阻塞）：线程执行时未竞争到锁对象
-+ Waiting（无限等待）：需要另外一个线程调用notify或者notifyAll唤醒
-+ Timed Waiting（计时等待）：类似于Waiting
-+ Teminated（被终止）：线程死亡
-
-
-
-
++ 启动线程是调用start方法而不是run方法，调用run方法的话会被当成普通的java对象（会先跑完子线程任务再执行主线程）
++ 不要把主线程任务放在启动子线程之前（会先跑完主线程任务再执行子线程）
 
 # 网络编程
 
