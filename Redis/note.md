@@ -186,6 +186,82 @@ typedef struct intset{
 
 
 
+
+
+
+
+## Dict
+
+由三部分组成，分别是哈希表（DictHashTable），哈希节点（DictEntry），字典（Dict）
+
+```c++
+typedef struct dictht {
+    dictEntry **table; //指向entry数组的指针
+    unsigned long size; //哈希表大小
+    unsigned long sizemask; //哈希表大小掩码，值为size-1
+    unsigned long used;//entry个数，是可能超过哈希表大小的
+} dictht;
+```
+
+```c++
+typedef struct dictEntry {
+    void *key;
+    union {
+        void *val;
+        uint64_t u64;
+        int64_t s64;
+        double d;
+    } v;
+    struct dictEntry *next;//下一个entry的指针
+} dictEntry;
+```
+
+Redis会根据key计算出hash值，然后利用h&sizemask计算元素存储到的位置（和sizemask进行与运算与对哈希表长度求余是一个效果）
+
+```c++
+typedef struct dict {
+    dictType *type;
+    void *privdata;
+    dictht ht[2]; //一个Dict中包含两个哈希表，一般只用一个，另一个用于rehash
+    long rehashidx;
+    int16_t pauserehash;
+}dict;
+```
+
+
+
+
+
+## ZipList
+
+
+
+
+
+
+
+## QuickList
+
+
+
+
+
+## SkipList
+
+
+
+
+
+## RedisObject
+
+
+
+
+
+
+
+
+
 # Redis数据类型
 
 ## String

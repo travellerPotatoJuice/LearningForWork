@@ -240,15 +240,117 @@ JVM 为了提升性能和减少内存消耗针对字符串（String 类）专门
 
 ![1712151406652](image\1712151406652.jpg)
 
+![image-20240404121435300](image/image-20240404121435300.jpg)
+
++ 魔数：每个 Class 文件的头 4 个字节称为魔数（Magic Number）,它的值是“CAFE BABE”（咖啡宝贝！）。它的唯一作用是**确定这个文件是否为一个能被虚拟机接收的 Class 文件**
++ class文件版本号：包括次版本号和主版本号
++ 常量池数量和常量池：
+  + 常量池的数量是 `constant_pool_count-1`（常量池计数器是从 1 开始计数的，将第 0 项常量空出来是有特殊考虑的，索引值为 0 代表“不引用任何一个常量池项”）。
+  + 常量池主要存放两大常量：字面量和符号引用。包括类和接口的全限定名，字段的名称和描述符，方法的名称和描述符 
++ 访问标志：用于识别类或者接口的访问信息，比如说这个Class是类还是接口，是否为pubilc或者abstract类型，是否为final等等。
++ 本类索引和父类索引：类索引用于确定这个Class的全限定名，父类索引用于确定这个类的父类的全限定名
++ 接口数量和接口索引：该Class实现了的接口的数量和名称
++ 字段数量和字段表：该Class声明的变量数量和名称，包括静态变量和实例变量，但是不包括方法体中的局部变量
++ 方法数量和方法表：该Class声明的方法数量和名称
++ 属性数量和属性表：字段表，方法表中都可以携带自己的属性表集合，以用于描述某些场景专有的信息。任何人实现的编译器都可以向属性表中写 入自己定义的属性信息，Java 虚拟机运行时会忽略掉它不认识的属性。
 
 
-**魔数**
 
-每个 Class 文件的头 4 个字节称为魔数（Magic Number）,它的值是“CAFE BABE”（咖啡宝贝！）。它的唯一作用是**确定这个文件是否为一个能被虚拟机接收的 Class 文件**
+# 类加载器
+
+类加载器的主要作用就是加载 Java 类的字节码（ `.class` 文件）到 JVM 中（在内存中生成一个代表该类的 `Class` 对象。
+
+ClassLoader是一个抽象类，给定类的二进制名称，类加载器会尝试定位或生成构成类定义的数据。典型的策略是将名称转换为文件名，然后从文件系统中读取该名称的“类文件”。
+
+每个 Java 类都有一个引用指向加载它的类加载器。不过，数组类不是通过 类加载器创建的，而是 JVM 在需要的时候自动创建的，数组类通过`getClassLoader()`方法获取 类加载器的时候和该数组的元素类型的类加载器是一致的。
 
 
 
+JVM 启动的时候，并不会一次性加载所有的类，而是根据需要去动态加载。类加载器的内部有一个Vector<Class<?>> classes容器，用于存放该类加载器加载过的类。
 
+
+
+**重要的类加载器:**
+
+1. 启动类加载器（BootstrapClassLoader），由C++实现，所以其父加载器是null。
+2. 扩展类加载器（ExtensionClassLoader），其父加载器是启动类加载器。JDK9后引入了模块化的思想，将其更名为平台类加载器
+3. 应用程序类加载器（AppClassLoader），也叫系统类加载器，是面向用户的加载器，负责加载当前应用classpath下所有jar包和类。其父加载器是扩展类加载器。
+
+值得特别注意的是，类加载器之间的父子关系不是以继承关系来实现的，而是以组合的方式来实现的
+
+
+
+**双亲委派机制：**
+
+ClassLoader类使用委托模型来搜索类和资源。每个ClassLoader实例都有一个相关的父类加载器。需要查找类或资源时，ClassLoader实例会在试图亲自查找类或资源之前，将搜索类或资源的任务委托给其父类加载器。
+
+总结起来就是一句话：自底向上查找判断类是否被加载，自顶向下尝试加载类。
+
+
+
+```java
+protected Class<?> loadClass(String name, boolean resolve)
+        throws ClassNotFoundException
+    {
+        synchronized (getClassLoadingLock(name)) {
+            // First, check if the class has already been loaded
+            Class<?> c = findLoadedClass(name);
+            if (c == null) {
+                long t0 = System.nanoTime();
+                try {
+                    if (parent != null) {
+                        c = parent.loadClass(name, false);
+                    } else {
+                        c = findBootstrapClassOrNull(name);
+                    }
+                } catch (ClassNotFoundException e) {
+                    // ClassNotFoundException thrown if class not found
+                    // from the non-null parent class loader
+                }
+
+                if (c == null) {
+                    // If still not found, then invoke findClass in order
+                    // to find the class.
+                    long t1 = System.nanoTime();
+                    c = findClass(name);
+
+                    // this is the defining class loader; record the stats
+                    sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);
+                    sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);
+                    sun.misc.PerfCounter.getFindClasses().increment();
+                }
+            }
+            if (resolve) {
+                resolveClass(c);
+            }
+            return c;
+        }
+    }
+```
+
+
+
+**双亲委派机制的好处：**
+
++ 避免类的重复加载：当加载器想要加载一个类时，会先去确认上级加载器是否加载过该类，从而避免已被加载过的类被再次加载
++ 保护核心类库：防止恶意代码通过自定义类加载器替换核心类库中的类。Java虚拟机会预先加载核心类库，由于启动类加载器是由本地代码编写的，难以被篡改，所以加载核心类库的过程可以被视为是安全的。当自定义类加载器想要篡改核心类库的内容时，会发现启动类加载器已经加载过了【实际上也就是避免了类的重复加载】
+
+
+
+**打破双亲委派机制的方法：**
+
++ 直接改写loadClass方法：更改类加载的流程，从而实现对双亲委派机制的打破
++ 使用线程上下文类加载器（ThreadContextClassLoader）：将类加载器保存在线程私有的数据里，在需要的时候取出来使用（借助Java.lang.Thread中的getContextClassLoader()和setContextClassLoader来获取和设置线程的上下文类加载器，如果没有设置的话，线程会继承其父线程的上下文类加载器）
+
+
+
+**自定义类加载器：**
+
+当前有一个.class文件在启动类加载器，扩展类加载器，以及应用程序类加载器都扫描不到的路径上，就可以手动实现一个自定义类加载器把它加载进来。
+
+要点在于这个类加载器需要继承ClassLoader抽象类，然后重写findClass方法（不打破双亲委派机制的情况下），在方法里主要是将文件转化成字节数组，然后调用defineClass方法传入类的名称，字节数组，及要读取的长度。在使用这个类加载器的时候调用loadClass方法即可实现类的加载。
+
+![image-20240404130922105](image/image-20240404130922105.jpg)
 
 
 
@@ -294,7 +396,7 @@ Java中为了简化对象的释放，引入了自动的垃圾回收（Garbage Co
 
 ## 堆的回收
 
-### 死亡对象判断方法
+**死亡对象判断方法**
 
 + 引用计数法：为每个对象维护一个引用计数器，对象被引用时+1，取消引用时-1
   + 优点：实现简单
@@ -312,7 +414,7 @@ Java中为了简化对象的释放，引入了自动的垃圾回收（Garbage Co
 
 
 
-### 五种对象引用方法
+**五种对象引用方法**
 
 **强引用：**
 
@@ -365,7 +467,7 @@ public T get()
 
 
 
-### 垃圾回收器算法
+**垃圾回收器算法**
 
 + **标记-清除算法**：标记存活对象，将没有标记的对象直接清除
   + 优点：简单容易实现
@@ -382,9 +484,9 @@ public T get()
 
 
 
-### 垃圾回收器
+**垃圾回收器**
 
-#### G1垃圾回收器（JDK8之前还不够成熟）
+**G1垃圾回收器（JDK8之前还不够成熟）**
 
 **区域划分**：G1垃圾回收器将Java堆划分成多个大小相等的区域（区域大小可以手动设置，但必须是2的整数次幂，取值范围为1M~32M），区域大小通常由堆空间大小/2048获得
 
@@ -445,28 +547,82 @@ public T get()
 
 + 方法区的调整：JDK7及之前的版本将方法区存放在堆中的永久代，JDK8及之后的版本将方法区存放在元空间
 + 字符串常量池的调整：JDK7之前，字符串常量池是运行时常量池的一部分，都存在于永久代中；JDK7字符串常量池被从方法区拿到了堆中；JDK8之后永久代被元空间替代，字符串常量池还在堆中
-
-
++ 这么调整的原因：
+  + 方法区的调整：提高内存上限，优化垃圾回收策略
+  + 字符串常量池的调整：优化垃圾回收策略，让方法区大小更可控，intern方法的优化，
 
 
 
 ## 类的生命周期有哪些？
 
-+ 加载阶段
-
-
++ 加载，连接（验证，准备，解析），初始化，使用，卸载
++ 每个阶段主要完成什么工作
 
 
 
 ## 什么是类加载器？
 
++ 类加载器的作用
++ 常见的三个类加载器及它们的作用，三个类加载器的层级结构
++ 自定义类加载器。继承ClassLoader抽象类，重写findClass方法，在findClass方法末尾需要调用一下defineClass方法
+
+
+
+## 如何打破双亲委派机制？
+
++ 加载器之间的层级关系
++ 双亲委派机制的内容
++ 双亲委派机制的作用
++ 打破双亲委派机制的方法：重写loadClass方法；使用上下文类加载器保存加载器
+
+
+
+![image-20240404132646904](image/image-20240404132646904.jpg)
+
+
+
+## Tomcat的自定义类加载器了解吗？
+
+以tomcat9为例
 
 
 
 
-## 什么是双亲委派机制？
+
+## 如何判断堆上的对象有没有被引用
+
+
+
+
 
 
 
 ## 常见的JVM参数
+
++ **栈内存参数**
+  + -Xss：栈内存大小。如果不设置的话系统会自动分配。
++ **堆内存参数**：根据最大并发量估计服务器的配置，再根据服务器配置计算最大堆内存。Xms和Xmx可以在一开始就设置成一样的，这样可以避免运行过程中动态扩容
+  + -Xmx：最大堆内存大小
+  + -Xms：初始堆内存大小
+  + -Xmn：年轻代大小。尽量设置得大一点，让对象可以尽可能存放在年轻代，不要进入老年代。G1垃圾回收器不要设置在这个值，垃圾回收器会动态调整
++ **元空间内存参数**：元空间在内存空间里，是可以无限制扩容的，如果不设置上限值，元空间内存泄漏的时候会导致内存不可控，影响性能。一般会根据测试情况设置最大值，设置为256M左右。
+  + -XX：MaxMetaspaceSize：最大元空间大小。
++ **日志参数**
+  + JDK8之前： 
+    + -XX：+PrintGCDetails  ： 启用垃圾回收详细日志，+表示启用，-表示禁用
+    + -XX：+PrintGCDateStamps：打印垃圾回收时间添加时间戳信息
+    + -Xloggc：指定文件路径
+  + JDK9及之后：
+    + -Xlog：gc*：file=文件路径
++ 堆内存快照参数
+  + -XX：+HeapDumpOnOutOfMemoryError：发生OutOfMemoryError时自动生成hprof内存快照
+  + -XX：HeapDumpPath= <path>：指定hprof文件的输出路径
++ 垃圾回收器参数
++ 垃圾回收器调优参数
+
+
+
+-XX：+DisableExplicitGC：禁止代码中使用System.gc()
+
+
 

@@ -3022,7 +3022,7 @@ public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
 
 <font size=5>**ExecutorService常用方法**</font>
 
-```
+```java
 Runnable target = new MyRunnable();
 
 //执行Runnable任务
@@ -3088,6 +3088,8 @@ public ThreadPoolExecutor(
 
 + 启动线程是调用start方法而不是run方法，调用run方法的话会被当成普通的java对象（会先跑完子线程任务再执行主线程）
 + 不要把主线程任务放在启动子线程之前（会先跑完主线程任务再执行子线程）
+
+
 
 # 网络编程
 
