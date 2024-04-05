@@ -285,15 +285,41 @@ QuickList是一种用于管理ZipList的结构，它的每一个Node指向一个
 
 ## SkipList
 
+ZipList和QuickList存取链表首尾的元素比较容易，但是获取中间的元素就需要挨个遍历，效率比较低，这也是逻辑上是链表的数据结构的一个弊端。
 
+SkipList是一个双向链表，但是它在链表的基础上提升了搜索效率，具体做法是在前向指针中引入了层级结构，每个节点的前向指针不再是一个仅仅指向下一节点的指针，而是一个指针数组，具有多层结构，层数是1到32之间的值。不同层的指针到下一节点的跨度不同，层级越高跨度越大。
+
+```c++
+typedef struct zskiplist {
+	struct zskiplistNode *header,*tail;
+	unsigned long length;
+	int level;
+} zskiplist;
+
+typedef struct zskiplistNode {
+    sds ele;
+    double score;
+    struct zskiplistNode *backward;
+    struct zskiplistLevel {
+        struct zskiplistNode *forward;
+    	unsigned long span;
+    } level[];
+} zskiplistNode;
+```
 
 
 
 ## RedisObject
 
-
-
-
+```c++
+typedef struct redisObject {
+	unsigned type:4; //对象的类型，string,hash,list,set,zset
+	unsigned encoding:4; //编码方式，共有11种编码方法
+	unsigned lru:LRU_BITS; // 记录当前redis对象最近一次被访问的时间
+	int refcount; // 引用计数器
+	void *ptr;//指向存放实际数据的空间
+} robj;
+```
 
 
 
