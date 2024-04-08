@@ -327,57 +327,6 @@ accessModifier type variableName;
 
 
 
-# 常用API（一）
-
-## String
-
-<font size=5>**注意事项**</font>
-
-1. String的对象是不可变的：字符串每次进行值更改的时候，实际上都是产生了新的字符串对象
-2. 以“...”写出的字符串对象会存储到字符串常量池中，且相同内容的字符串只会存储一份
-3. 通过new方式创建字符串对象，每new一次都会产生一个新的对象
-
-
-
-<font size=5>**常见构造器**</font>
-
-1. public String()：String name = new String();
-2. public String(String original): String name = new String("heiheihiehi");
-3. public String(char[] chars):String name = new String(chars);
-4. public String(byte[] types):String name = new String(types);
-
-
-
-<font size=5>**常见方法**</font> 
-
-+ int length
-+ char charAt
-+ char[] toCharArray //字符串转化成字符数组
-+ boolean equals
-+ boolean equalsIgnoreCase //忽略大小写比较字符串内容
-+ String substring(int beginIndex,int endIndex) //[)，右边是开区间
-+ String substring(int beginIndex) //当前索引一直到字符串结尾
-+ String replace（CharSequence target，CharSequence replacement） 
-+ boolean contains（charSequence s）//判断是否包含关键字
-+ boolean startsWith（String prefix）//判断字符串是否以某个字符串开头
-+ String[] split（String regex） //按指定内容分割成多个字符串，放到一个字符串数组中返回给我们
-
-
-
-
-
-## ArrayList
-
-<font size=5>**常见方法**</font>
-
-+ public boolean add(E e)
-+ public void add(int index, E element)
-+ public E get(int index)
-+ public int size()
-+ public E remove(int index)
-+ public boolean remove(Object o)
-+ public E set(int index,E element)
-
 
 
 # 面向对象高级
@@ -986,7 +935,7 @@ Cloneable接口：是一个标记接口，它指示实现了这个接口的类�
 
 Objects类是java.util下的一个工具类
 
-### Objects类的常见方法
+**Objects类的常见方法**
 
 1. public static boolean equals(Object a,Object b);  //判断两个对象是否相等
 
@@ -1123,7 +1072,7 @@ public String toString()
 
 ## Math,System,Runtime工具类
 
-### Math 
+**Math** 
 
 ```java
 //取绝对值
@@ -1153,7 +1102,7 @@ public static double random();
 
 
 
-### System
+**System**
 
 ```java
 //终止当前运行的java虚拟机，status用作状态码，非0表示异常终止。不要用这个代码，在系统里和删库跑路差不多
@@ -1165,7 +1114,7 @@ public static long currentTimeMillis();
 
 
 
-### Runtime：单例类
+**Runtime：单例类**
 
 ```
 //返回与当前Java应用程序关联的运行时对象
@@ -1230,7 +1179,7 @@ public double doubleValue();
 
 ## JDK8之前的日期与时间
 
-### Date
+**Date**
 
 ```Java
 //构造器
@@ -1249,7 +1198,7 @@ public void setTime(long time);
 
 
 
-### SimpleDateFormat
+**SimpleDateFormat**
 
 对日期对象和时间毫秒值进行格式化
 
@@ -1273,7 +1222,7 @@ public Date parse(String source);
 
 
 
-### Calendar
+**Calendar**
 
 Java中的Calendar是一个**抽象类**，它为操作日历字段（如年、月、日）提供了一种方式。
 
@@ -1500,7 +1449,7 @@ Arrays.sort(students, new Comparator<Student>(){
 
 ## JDK8新特性
 
-### Lambda表达式
+**Lambda表达式**
 
 Lambda表达式是JDK8开始新增的一种语法形式，**用于简化匿名内部类的代码写法**。
 
@@ -1550,7 +1499,7 @@ interface Swimming{
 
 
 
-### 方法引用
+**方法引用**
 
 + **静态方法引用：**写一个比较类，把比较方法写成静态方法
 
@@ -1695,29 +1644,28 @@ interface Swimming{
 
 
 
-# 集合框架（一）
+# 集合框架
 
 ## Collection集合体系
-
-特点： 
 
 Collection（接口）
 
 + List（接口）：添加的元素是有序，可重复，有索引的
 
-  + ArrayList（实现类），LinkedList（实现类）：有序，可重复，有索引
+  + ArrayList（实现类）
+  + LinkedList（实现类）
 
 + Set（接口）：添加的元素是无序，不重复，无索引的
 
-  + HashSet（实现类）：无序，不重复，无索引
+  + HashSet（实现类）：
 
-    + LinkedHashSet（实现类）：有序，不重复，无索引
+    + LinkedHashSet（实现类）：有序
 
-  + TreeSet（实现类）：按照大小默认升序排序，不重复，无索引
+  + TreeSet（实现类）：按照大小默认升序排序
 
     
 
-## Collection常用方法：
+**Collection常用方法：**
 
 ```Java
 //添加元素
@@ -1744,7 +1692,7 @@ public Object[] toArray();
 
 
 
-## Collection的遍历方式
+**Collection的遍历方式**
 
 + 迭代器（iterator）
 
@@ -1789,7 +1737,7 @@ public Object[] toArray();
 
   
 
-## List系列集合
+### List系列
 
 **常用方法**
 
@@ -1807,16 +1755,77 @@ public E get(int index)
 public E set(int index, E element);
 ```
 
+--------------
+
+<font size=5>**ArrayList**</font>
+
+底层是数组队列，相当于动态数组，查询快，增删慢。**不是线程安全的**
+
+```java
+public class ArrayList<E> extends AbstractList<E>
+        implements List<E>, RandomAccess, Cloneable,java.io.Serializable{
+
+}
+
+```
+
++ List：表示是一个列表，支持List中定义的基本操作
++ RandomAccess：支持随机快速访问
++ Cloneable：可以进行深拷贝浅拷贝
++ Serializable：可以进行序列化
 
 
-### List实现类ArrayList
 
-基于数组实现，查询快，增删慢
+**ArrayList的动态扩容机制：**
 
-+ 利用无参构造器创建的ArrayList会在底层创建一个默认长度为0的数组
-+ 添加第一个元素的时候，底层会创建一个新的长度为10的数组
-+ 存满时，扩容1.5倍
-+ 如果一次添加多个元素，1.5倍还放不下，则新创建数组的长度以实际为准
++ 利用无参构造器创建的ArrayList会在底层创建一个默认长度为0的数组，如果创建对象时指定了长度，则创建指定长度的数组。
++ 添加第一个元素的时候，会开始计算所需的容量，取size+1和默认容量的较大值。如果当前数组容量小于需要的容量时，调用grow方法进行扩容
++ 在grow方法中，先将数组扩容到1.5倍，如果够存，就将就数组复制到新数组中
++ 如果不够存，就以实际需要的容量作为新数组长度。
++ 如果新数组长度比MAX_ARRAY_SIZE（Integer.MAX_VALUE -8）还要大，就设置为Integer.MAX_VALUE。
+
+
+
+
+
+**System.arraycopy()和Arrays.copyOf()**
+
+**System.arraycopy():**
+
+ArrayList在插入元素时，如果插入的元素不在末尾，就需要用到System.arraycopy这个native方法，将index及之后的位置挪到index+1及之后，再在index处插入元素
+
+```java
+/**
+    *   复制数组
+    * @param src 源数组
+    * @param srcPos 源数组中的起始位置
+    * @param dest 目标数组
+    * @param destPos 目标数组中的起始位置
+    * @param length 要复制的数组元素的数量
+    */
+    public static native void arraycopy(Object src,  int  srcPos,
+                                        Object dest, int destPos,
+                                        int length);
+
+```
+
+
+
+**Arrays.copyOf():**
+
+在toArray()方法中用到了。Arrays.copyOf()底层调用的也是System.arraycopy方法，实际上是实现了数组的扩容
+
+```java
+public static int[] copyOf(int[] original, int newLength) {
+      // 申请一个新的数组
+        int[] copy = new int[newLength];
+  // 调用System.arraycopy,将源数组中的数据进行拷贝,并返回新的数组
+        System.arraycopy(original, 0, copy, 0,
+                         Math.min(original.length, newLength));
+        return copy;
+    }
+
+```
 
 
 
@@ -1825,31 +1834,52 @@ public E set(int index, E element);
 + 适合：根据索引查询数据，比如根据随机索引取数据，或者数据量不是很大的时候
 + 不适合：数据量大的同时，又要频繁地进行增删操作
 
+---------------
 
+<font size=5>**LinkedList**</font>
 
-### List实现类LinkedList
-
-基于双向链表实现，查询慢，增删快，对首尾元素进行增删改查速度快
+基于双向链表实现，查询慢，增删快，对首尾元素进行增删改查速度快，**不是线程安全的**
 
 ```Java
-//在开头插入指定元素
-public void addFirst(E e);
+public class LinkedList<E>
+    extends AbstractSequentialList<E>
+    implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+{
+  //...
+}
 
-//将指定元素追加到末尾
-public void addLast(E e);
-
-//返回列表中第一个元素
-public E getFirst();
-
-//返回列表中最后一个元素
-public E getLast();
-
-//删除返回列表中第一个元素
-public E removeFirst();
-
-//删除返回列表中最后一个元素
-public E removeLast();
 ```
+
+
+
++ List：表示是一个列表，支持List中定义的基本操作
++ Deque：继承自Queue，具有双端队列的特性
++ Cloneable：可以进行深拷贝浅拷贝
++ Serializable：可以进行序列化
+
+
+
+```java
+private static class Node<E> {
+    E item;// 节点值
+    Node<E> next; // 指向的下一个节点（后继节点）
+    Node<E> prev; // 指向的前一个节点（前驱结点）
+
+    // 初始化参数顺序分别是：前驱结点、本身节点值、后继节点
+    Node(Node<E> prev, E element, Node<E> next) {
+        this.item = element;
+        this.next = next;
+        this.prev = prev;
+    }
+}
+
+```
+
+
+
+LinkedList获取元素的方法有getFirst(),getLast(),get(int index)，其中first元素和last元素都是在数据结构中保存的，所以取的时候速度很快。但是get(int index)的时候需要遍历链表。remove(int index)的时候同理。
+
+为了加快查找速度，LinkedList会计算list的size/2，如果index小于这个值，就从first开始向后遍历，如果index大于这个值，就从last开始向前遍历。
 
 
 
@@ -1862,7 +1892,7 @@ public E removeLast();
 
 
 
-## Set系列集合
+### Set系列
 
 Set
 
@@ -1874,7 +1904,7 @@ Set
 
   
 
-### 哈希值
+**哈希值**
 
 + 一个int类型的数值，Java中的每个对象都有一个哈希值
 
@@ -1890,7 +1920,7 @@ Set
 
 
 
-### HashSet
+**HashSet**
 
 **Hashset**：基于哈希表实现，哈希表是一种增删改查数据性能都较好的数据结构。JDK8之前，哈希表=数组+链表；JDK8之后，哈希表= 数组+链表+红黑树。HashSet默认不能对**两个内容一样的不同对象**进行去重复，如果需要实现对内容一样的对象的去重，需要重写hashCode()和equals()方法（让两个对象的哈希值一样，映射到数组中的一个位置，同时equals的比较结果也要是一样的）
 
@@ -1910,7 +1940,7 @@ Set
 
 
 
-### LinkedHashSet
+**LinkedHashSet**
 
 **LinkedHashSet**：HashSet的子类，有序，不重复，无索引。基于哈希表实现，并且额外引入了一个双链表，这个双链表用于记录前后元素（添加的顺序，不是同一索引位置的前后顺序）的位置，所以是有序的。
 
@@ -1918,7 +1948,7 @@ Set
 
 
 
-### TreeSet
+**TreeSet**
 
 **TreeSet**：可排序，不重复，无索引。基于红黑树实现
 
@@ -1928,9 +1958,90 @@ TreeSet自定义排序规则：
 + 通过调用TreeSet集合有参数的构造器（在参数列表里创建Comparator对象，然后重写compare方法）
 + 如果TreeSet和TreeSet中包含的类都实现了排序规则，那么就近使用TreeSet中实现的排序规则
 
+### Queue系列
 
 
-### 集合并发修改异常
+
+
+
+## Map集合体系
+
+### Map系列
+
+Map<K,V>(接口)
+
++ HashMap<K,V>（实现类)：无序，不重复，无索引
+  + LinkedHashMap<K,V>（实现类)：有序，不重复，无索引
++ TreeMap<K,V>（实现类)：按照大小默认升序排序，不重复，无索引
+
+
+
+**Map集合常用方法**
+
+```Java
+//获取Map大小
+public int size();
+
+//清空map集合
+public void clear();
+
+//判断Map是否为空
+public boolean  isEmpty();
+
+//根据键值获取对应值
+public V get(Object obj);
+
+//根据键值删除整个元素，并返回键值对应的元素
+public V remove(Object key);
+
+//判断是否包含某个键
+public boolean containsKey(Object key)
+
+//判断是否包含某个值
+public boolean containsValue(Object value)
+
+//获取Map集合的全部键，以Set的形式返回
+public Set<K> keySet();
+
+//获取Map集合的全部值，以Collection的形式返回
+public Collection<V> values();
+
+//把其他Map集合中的数据导入到自己的Map中来
+//如果键值冲突，会被覆盖
+//map1中的数据加入map2
+map2.putAll(map1);
+```
+
+
+
+**Map集合的遍历方式**
+
++ 键找值
+  1. public Set<K> keySet(); 获取键的集合
+  2. public V get(Object obj); 根据键获得值
++ 键值对
+  1. Set<Map.Entry<K,V>> entrySet(); 获取所有“键值对”的集合（）
+  2. 增强for循环的时候，Map中的元素类型为Map.Entry<K,V>
+  3. getKey()和getValue()获取值和键
++ Lambda：JDK8后新增的forEach方法，在参数中new一个BiConsumer的匿名内部类
+  1.  map.forEach((k,v)->{System.out.println(k+"--------->"+v)});
+
+
+
+**集合嵌套**
+
+```Java
+public static void main(String[] args){
+	Map<String, List<String>> map = new HashMap<>();
+    List<String> cities1 = new ArrayList<>();
+    Collections.addAll(cities,"南京市","扬州市","苏州市","无锡市","常州市");
+    amp.put("江苏省",cities1);
+}
+```
+
+
+
+**集合并发修改异常**
 
 使用迭代器遍历集合时，删除集合中的数据，程序会出现并发修改异常的错误（实际上用普通for循环也可能会出现问题，但是不会报错，只会返回一个错误的结果）
 
@@ -2020,79 +2131,6 @@ public static <T> void sort(List<T> list, Comparator<? super T> c);
 
 
 
-
-## Map
-
-Map<K,V>(接口)
-
-+ HashMap<K,V>（实现类)：无序，不重复，无索引
-  + LinkedHashMap<K,V>（实现类)：有序，不重复，无索引
-+ TreeMap<K,V>（实现类)：按照大小默认升序排序，不重复，无索引
-
-
-
-### Map集合常用方法
-
-```Java
-//获取Map大小
-public int size();
-
-//清空map集合
-public void clear();
-
-//判断Map是否为空
-public boolean  isEmpty();
-
-//根据键值获取对应值
-public V get(Object obj);
-
-//根据键值删除整个元素，并返回键值对应的元素
-public V remove(Object key);
-
-//判断是否包含某个键
-public boolean containsKey(Object key)
-
-//判断是否包含某个值
-public boolean containsValue(Object value)
-
-//获取Map集合的全部键，以Set的形式返回
-public Set<K> keySet();
-
-//获取Map集合的全部值，以Collection的形式返回
-public Collection<V> values();
-
-//把其他Map集合中的数据导入到自己的Map中来
-//如果键值冲突，会被覆盖
-//map1中的数据加入map2
-map2.putAll(map1);
-```
-
-
-
-### Map集合的遍历方式
-
-+ 键找值
-  1. public Set<K> keySet(); 获取键的集合
-  2. public V get(Object obj); 根据键获得值
-+ 键值对
-  1. Set<Map.Entry<K,V>> entrySet(); 获取所有“键值对”的集合（）
-  2. 增强for循环的时候，Map中的元素类型为Map.Entry<K,V>
-  3. getKey()和getValue()获取值和键
-+ Lambda：JDK8后新增的forEach方法，在参数中new一个BiConsumer的匿名内部类
-  1.  map.forEach((k,v)->{System.out.println(k+"--------->"+v)});
-
-
-
-### 集合嵌套
-
-```Java
-public static void main(String[] args){
-	Map<String, List<String>> map = new HashMap<>();
-    List<String> cities1 = new ArrayList<>();
-    Collections.addAll(cities,"南京市","扬州市","苏州市","无锡市","常州市");
-    amp.put("江苏省",cities1);
-}
-```
 
 
 
@@ -2307,11 +2345,22 @@ public File[] listFiles();
 
 
 
-# IO
+# IO流
 
-IO流：用于读写数据
+## 常见IO流
 
-## 字符集
+IO 即 Input/Output，输入和输出。数据输入到计算机内存的过程即输入，反之输出到外部存储（比如数据库，文件，远程主机）的过程即输出。
+
+IO流按**流的方向**分可分为输入流和输出流，按照流中数据的**最小单位**分可分为字节流和字符流。
+
+Java IO 流的 40 多个类都是从如下 4 个抽象类基类中派生出来的。
+
+- `InputStream`/`Reader`: 所有的输入流的基类，前者是字节输入流，后者是字符输入流。
+- `OutputStream`/`Writer`: 所有输出流的基类，前者是字节输出流，后者是字符输出流。
+
+---------------
+
+<font size=5>**字符集**</font>
 
 **标准ASCII字符集**：使用1个字节存储一个字符，首尾是0，总共可以表示128个字符
 
@@ -2340,113 +2389,35 @@ String(byte[] bytes);
 String(byte[] bytes,String charsetName);
 ```
 
+------------------
 
+<font size=5>**InputStream**</font>
 
-
-
-## IO流
-
-**按流的方向分：**
-
-+ I：Input，输入流，负责把数据读到内存中
-
-+ O：Output，输出流，负责把数据写出去
-
-
-
-**按流中数据的最小单位分：**
-
-+ 字节流：适合操作所有类型的文件
-+ 字符流：只适合操作纯文本文件
-
-字节流适合做一切文件数据的拷贝，不适合读取中文内容的输出
-
-字符流适合做文本文件的操作
-
-
-
-+ 字节输入流：InputStream（抽象类）
-
-  + FileInputStream（实现类）
-
-+ 字节输出流：OutputStream（抽象类）
-
-  + FileOutputStream（实现类）
-
-+ 字符输入流：Reader（抽象类）
-
-  + FileReader（实现类）
-
-+ 字符输出流：Writer（抽象类）
-
-  + FileWriter（实现类）
-
-  
-
-
+其重要实现类有：FileInputStream，BufferedInputStream，
 
 **FileInputStream**
 
-**创建对象：**
+可以先创建一个文件对象，再创建文件输入流。也可以直接根据文件路径创建文件输入流
 
 ```Java
-//创建对象方法1
+//构造器
 public FileInputStream(File file);
 
-//创建对象方法2
-//不用创建文件对象，直接给文件路径名就可以了
 public FileInputStream(String pathname);
 ```
 
+第一种方法是一次读一个字节，需要频繁进行系统调用，性能不佳
 
+第二种方法是从输入流中读取一些字节存储到buffer中，性能稍微比上面那种好一点。还可以实现读取整个文件，只需要把buffer数组的大小设置为文件大小即可。
 
-**一次读取单个字节：**
+第三种方法是JDK1.9开始才有的
 
 ```Java
-//读取文件的字节数据
-//每次读取一个字节返回，如果没有数据了，返回-1
-//读取数据的性能很差。因为每次读一个字节都要调用一次系统资源，读取汉字等不由一个字节编码的内容会乱码
-//流使用完毕后必须要关闭流！释放系统资源！！！！
+//常用方法
 public int read();
-```
 
-
-
-**一次读取多个字节：**
-
-```java
-//每次用一个字节数组去读取数据，返回字节数组读取了多少个字节。
-//如果读取完毕会返回-1
-//读取性能得到了提升，但读取汉字还是有可能会乱码
-byte[] buffer = new byte[3];//每次最多读取3个字节
 public int read(byte[] buffer);
-
-//使用循环改造，实现多次读取
-byte[] buffer = new byte[3];
-int len;
-while((len = is.read(buffer))!=-1){
-    String rs = new String(buffer,0,len);
-}
-```
-
-
-
-**一次读完全部字节:**
-
-```Java
-//方式一：定义一个和文件大小一样的字节数组，利用该数组一次读完文件全部字节
-public int read(byte[] buffer);
-
-InputStream is = new FileInputStream("C:\\Users\\83538\\Desktop\\aaa.txt");
-File f = new File("C:\\Users\\83538\\Desktop\\aaa.txt");
-long length = f.length();
-byte[] buffer = new byte[(int)length];
-int len = is.read(buffer);
-System.out.println(len);
-is.close();
-
-//方法二：Java提供的方法，可以将文件全部字节读取到一个字节数组中返回
-//1.9才引入
+//JDK1.9才引入
 public byte[] readAllBytes() throws IOException
 ```
 
@@ -2454,30 +2425,32 @@ public byte[] readAllBytes() throws IOException
 
 
 
+<font size=5>**OutputStream**</font>
+
+其重要实现类有：FileOutputStream，BufferedOutputStream，PrintStream
+
 **FileOutputStream**
 
-**创建对象：**
-
 ```Java
-//创建对象方法1
+//构造器
 public FileOutputStream(File file);
 
-//创建对象方法2
 public FileOutputStream(String filepath);
 
 //创建一个追加数据管道
 public FileOutputStream(File file, boolean append);
 
-//创建一个追加数据管道
 public FileOutputStream(String filepath, boolean append)
 ```
 
+第一种方法是将特定字节写入输出流
 
+第二种方法是将一个字节数组写入输出流
 
-**常用方法**
+第三种方法是从buffer数组的第pos个字节开始，将len个字节写入输出流
 
 ```Java
-//写一个字节出去
+//常用方法
 public void write(int a);
 
 //写一个字节数组出去
@@ -2485,39 +2458,35 @@ public void write(byte[] buffer);
 
 //从字节数组buffer的第pos个字节开始，写len个字节
 public void write(byte[] buffer,int pos,int len);
-
-//关闭输出流
-public void close() throws IOException;
 ```
 
 
 
+<font size=5>**Reader**</font>
 
+其重要实现类有：FileReader，BufferedReader
 
 **FileReader**
 
-**创建对象：**
-
 ```java
-//创建对象方法1
+//构造方法
 public FileReader(File file);
 
-//创建对象方法2
 public FileReader(String pathname);
 ```
 
-
-
-**常用方法**
-
 ```Java
-//每次读取一个字符返回，如果没有数据可读，返回-1
+//常用方法
 public int read();
 
-//每次用一个字符数组去读，返回读取的个数
 public int read(char[] buffer)
-
 ```
+
+
+
+<font size=5>**Writer**</font>
+
+其重要实现类有：FileWriter，BufferedWriter，PrintWriter
 
 
 
@@ -2525,48 +2494,57 @@ public int read(char[] buffer)
 
 **字符输出流写出数据后，必须刷新流，或者关闭流，写出去的数据才能生效！！！！！！**这是因为为了提高性能，输出流会把数据先都写入缓冲区，最后再将缓冲区中的数据存入到文件中去，这样能减少系统调用的次数提高性能。只有进行filewriter.flush()或者filewriter.close()，才会自动将缓冲区中的内容写入文件。
 
-
-
-**创建对象：**
-
 ```java
-//创建对象方法1
+//构造方法
 public FileWriter(File file);
 
-//创建对象方法2
 public FileWriter(String filepath);
 
 //创建一个追加数据管道
 public FileWriter(File file, boolean append);
 
-//创建一个追加数据管道
 public FileWriter(String filepath, boolean append)
 ```
 
-
-
-**常用方法**
-
 ```Java
-//写一个字符出去
+//常用方法
 public void write();
 
-//写一个字符串出去
 public void write(String str);
 
-//写字符串的一部分出去
 public void write(String str, int pos, int len);
 
-//写一个字符数组出去
 public void write(char[] buffer);
 
-//写字符数组的一部分出去
 public void write(char[] buffer, int pos, int len)
 ```
 
 
 
-**try-catch-finally && try-with-resource**
+<font size=5>**RandomAccessFile**</font>
+
+随机访问流，支持随意跳转到文件的任意位置进行读写。可以指定其读写模式mode：
+
++ r：只读模式
++ rw：读写模式
++ rws：同步更新对“文件的内容”或“元数据”的修改到外部存储设备。
++ rwd：同步更新对“文件的内容”的修改到外部存储设备。
+
+随机访问流的一个显著有点是可以帮助实现大文件的断点续传，简单来说就是上传文件中途暂停或失败（比如遇到网络问题）之后，不需要重新上传，只需要上传那些未成功上传的文件分片即可。而随机访问流可以帮忙合并文件分片
+
+```java
+public RandomAccessFile(File file, String mode)
+    throws FileNotFoundException {
+    this(file, mode, false);
+}
+
+```
+
+
+
+--------------
+
+<font size=5>**try-catch-finally**</font>
 
 ```
 创建流
@@ -2608,37 +2586,85 @@ try(
 
 
 
+## Java IO 设计模式
 
+<font size=5>**装饰器模式**</font>
 
-## 缓冲流
-
-对原始流进行包装，以提高原始流读写数据的性能。
-
-+ BufferedInputStream
-+ BufferedOutputStream
-+ BufferedReader
-+ BufferedWriter
+在装饰器模式中，装饰器类会实现与被装饰对象相同的接口或继承相同的父类，并且内部持有一个被装饰对象的引用。这样，在调用装饰器对象的方法时，它会调用被装饰对象相同的方法，并可以在调用前后添加额外的行为。**也就是在不改变原有对象的基础上拓展其功能**
 
 
 
-## 转换流
+举个例子来说，BufferedInputStream和FileInputStream之间就存在装饰器模式，二者继承相同的父类InputStream，并且BufferedInputStream有一个构造函数：
 
-如果代码编码和被读取的文件文本的编码是一致的，使用字符流读取文本文件时不会出现乱码；如果不是一致的，使用字符流读取的时候会出现乱码
+```java
+public BufferedInputStream(InputStream in) {
+    this(in, DEFAULT_BUFFER_SIZE);
+}
+```
 
-**主要思想：**获取文件原始字节流，然后按照真实的字符集编码转换成字符流
+所以它可以调用FileInputStream的方法。同理BufferedInputStream和InputStream所有的实现类之间都存在这种关系。
 
-+ InputStreamReader
+和继承相比，装饰器可以有效避免类爆炸，比如说InputStream有很多个实现类，如果要用继承来为每个子类来扩展功能，那么就要创建很多很多个扩展功能类。可是装饰器可以很好的避免这一点，只需要一个装饰器类就可以对所有实现了InputStream的类进行扩展
 
-+ OutputStreamReader
 
-  
 
-## 打印流
+<font size=5>**适配器模式**</font>
 
-提供更加方便，高效的打印方法
 
-+ PrintStream
-+ PrintWriter
+
+
+
+
+
+## IO模型
+
+常见的IO 模型一共有 5 种：**同步阻塞 I/O**、**同步非阻塞 I/O**、**I/O 多路复用**、**信号驱动 I/O** 和**异步 I/O**。这个知识点在Redis的网络模型中也会提到，需要好好体会。
+
+
+
+**BIO（Blocking IO）**
+
+同步阻塞IO。应用程序发起 read 调用后，会一直阻塞，直到内核把数据拷贝到用户空间。
+
+优点是比较简单。缺点是线程或进程会因为等待IO而处于空闲状态，无法执行其他任务，影响了系统的并发性和吞吐量
+
+
+
+**NIO（Non-blocking IO）**
+
+当线程或进程发起read调用时，如果数据尚未准备好或者没有就绪，线程或进程不会被阻塞，而是不断进行系统调用，轮询数据是否已经准备好。在此过程中，CPU会一直空转。等内核把数据准备好了，将数据从内核空间拷贝到用户空间的这段时间里，线程或进程才被阻塞。
+
+优点是线程不会被阻塞，避免了CPU进行上下文切换的开销。缺点是会一直占用CPU，导致系统吞吐量下降。
+
+
+
+**IO多路复用**
+
+IO 多路复用模型中，线程首先发起 select/poll/epoll 调用，通过一个进程同时监听多个文件描述符（FD，File Descriptor），系统发现某个FD处于可读或者可写状态时，就会通知用户应用。监听FD的方式有很多种，常见的有：
+
++ select：只会通知用户进程有FD就绪，需要用户进程逐个遍历FD来确认。
++ poll：只会通知用户进程有FD就绪，需要用户进程逐个遍历FD来确认。
++ epoll：epoll 是 Linux 特有的高性能 I/O 多路复用机制，它在通知用户进程FD就绪的同时，会把已经就绪的FD写入用户空间
+
+简单来说就是线程发起一个系统调用查询数据状态，内核准备数据就绪后会通知
+
+
+
+
+
+**AIO（Asynchronous IO）**
+
+信号驱动IO。
+
+
+
+**异步IO**
+
+
+
+
+
+## NIO
 
 
 
