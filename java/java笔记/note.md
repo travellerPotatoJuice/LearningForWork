@@ -2069,7 +2069,73 @@ while(it.hasNext()){
 
 + 如果用for循环遍历，则倒着遍历并删除；或者从前往后遍历，但每次删除都做i--操作
 
-  
+
+
+
+---------
+
+<font size=5>**HashMap**</font>
+
+JDK1.8之前由数组+链表组成，数组是主体，链表是为了解决哈希冲突。JDK1.8之后，在解决哈希冲突时引入了判断，链表长度大于等于阈值（默认为8）时，会转换成红黑树。【转成红黑树之前会判断数组长度，如果数组长度小于64，优先数组扩容】。
+
+hashMap默认初始化大小是16，之后每次扩容都会变成原来的两倍，也就是说HashMap的大小总是2的幂
+
+```java
+public class HashMap<K,V> extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable {
+}
+```
+
++ Map<K,V>：表示存储的是键值对
++ Cloneable：可以进行深拷贝浅拷贝
++ Serializable：可以进行序列化
+
+
+
+**解决哈希冲突**
+
+hashMap中的哈希方法实际上是对key调用Object的hashCode方法，然后再加上一个扰动。
+
+```java
+//1.8的哈希方法
+    static final int hash(Object key) {
+      int h;
+      // key.hashCode()：返回散列值也就是hashcode
+      // ^：按位异或
+      // >>>:无符号右移，忽略符号位，空位都以0补齐
+      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+  }    
+
+```
+
+**负载因子**：哈希表中存放的数据数量/哈希表的容量，默认为0.75f。负载因子和哈希表容量的乘积叫threshold，当哈希表中的元素数量达到threshold，就会触发一次扩容
+
+当链表长度大于阈值（默认为8）时，会调用treeifyBin()方法，在该方法内部会先检查哈希数组的长度，如果小于MIN_TREEIFY_CAPACITY（64），则调用resize方法扩容数组。否则就将其转为红黑树。
+
+```java
+final void treeifyBin(Node<K,V>[] tab, int hash) {
+        int n, index; Node<K,V> e;
+        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
+            resize();
+        else if ((e = tab[index = (n - 1) & hash]) != null) {
+            TreeNode<K,V> hd = null, tl = null;
+            do {
+                TreeNode<K,V> p = replacementTreeNode(e, null);
+                if (tl == null)
+                    hd = p;
+                else {
+                    p.prev = tl;
+                    tl.next = p;
+                }
+                tl = p;
+            } while ((e = e.next) != null);
+            if ((tab[index] = hd) != null)
+                hd.treeify(tab);
+        }
+    }
+```
+
+
 
 # 集合框架（二）
 
@@ -2618,7 +2684,15 @@ public BufferedInputStream(InputStream in) {
 
 ## IO模型
 
-常见的IO 模型一共有 5 种：**同步阻塞 I/O**、**同步非阻塞 I/O**、**I/O 多路复用**、**异步 I/O** 和**信号驱动 I/O**。这个知识点在Redis的网络模型中也会提到，需要好好体会。
+![image-20240409114747837](image/image-20240409114747837.jpg)
+
+
+
+
+
+
+
+常见的IO 模型一共有 5 种：**同步阻塞 I/O**、**同步非阻塞 I/O**、**I/O 多路复用**、**信号驱动 I/O**和**异步 I/O** 。这个知识点在Redis的网络模型中也会提到，需要好好体会。
 
 
 
@@ -2646,7 +2720,7 @@ IO 多路复用模型中，应用程序首先发起 select/poll/epoll 调用，�
 + poll：只会通知用户进程有FD就绪，需要用户进程逐个遍历FD来确认。
 + epoll：epoll 是 Linux 特有的高性能 I/O 多路复用机制，它在通知用户进程FD就绪的同时，会把已经就绪的FD写入用户空间
 
-简单来说就是线程发起一个系统调用查询数据状态，内核准备数据就绪后会通知
+简单来说就是线程发起一个系统调用查询数据状态，内核准备数据就绪后会通知。【实际上也是阻塞IO吧，只不过从一次监听一个文件变成了一次监听多个文件】
 
 
 
@@ -2670,15 +2744,76 @@ IO 多路复用模型中，应用程序首先发起 select/poll/epoll 调用，�
 
 ## NIO
 
+**Buffer（缓冲区）**：NIO 读写数据都是通过缓冲区进行操作的。读操作的时候将 Channel 中的数据填充到 Buffer 中，而写操作时将 Buffer 中的数据写入到 Channel 中。在Java NIO中是一个抽象类。
+
++ capacity：缓冲区的容量，不能为负，并且创建后不能修改
++ limit：可以读/写数据的边界。在写模式下，通常等于capacity，表示最多可以写到capacity的位置；在读模式下，通常等于缓冲区中已经存在的数据的大小，下一个位置就为空了。
++ position：下一个可以被读写的数据的位置。
++ mark：用于在buffer中进行标记，后续可以通过调用reset方法重新回到mark的地方进行读写
+
+Buffer中最核心的方法有两个，一个是get()，用于读取缓冲区中的数据；另一个是put()，用于向缓冲区中写入数据。除此之外还有两个重要方法： 
+
++ flip：将缓冲区从写模式切换为读模式，此时limit的值会设置为position的值，position的值会设置为0
++ clear：将缓冲区从读模式切换为写模式，缓冲区中的内容会清空，limit的值会设置为capacity的值，position的值会设置为0
 
 
 
+**Channel（通道）：**Channel 是一个通道，它建立了与数据源（如文件、网络套接字等）之间的连接。区别于流，流是单向的，而通道是双向的。通道也可以进行异步读写数据。在Java NIO中是一个接口。通道接口本身只声明了两个方法，一个是isOpen(),另外一个是close()。其常见的实现类有FileChannel，SocketChannel，ServerSocketChannel，DatagramChannel
 
 
 
+**Selector（选择器）：**基于事件驱动的 I/O 多路复用模型，会不断轮询注册在其上的Channel，一旦Channel处于就绪状态，Selector就会将其加入就绪集合。【非阻塞IO的精髓所在】
+
+【此处要特别注意Java NIO中IO多路复用和普通IO多路复用的区别，普通IO多路复用模型中，应用程序会调用select/poll/epoll等系统调用进行轮询，从而导致自身的阻塞。而Java NIO的IO多路复用中，是基于Selector类实现对Channel的监听，主线程并不会调用系统调用，所以就相应的不会阻塞自身了】
+
+epoll为什么比select高效？？？？？？？？？？？？？
+
+epoll是基于事件驱动的，它会在文件描述符上注册事件，并在事件发生时通知应用程序，而select需要轮询。并且由于在select系统调用后，内核需要获取到文件描述符才能对文件进行轮询，所以会出现将文件描述符集合从用户态复制到内核态的过程，一旦文件描述符数量增加，遍历的成本就提高了，性能就会下降。
 
 
 
+**selector可以监听的事件类型**：
+
++ SelectionKey.OP_ACCEPT：当关联的服务器通道（ServerSocketChannel）接受到新的客户端连接时，会触发接受连接事件。
++ SelectionKey.OP_CONNECT:当关联的客户端通道（SocketChannel）建立连接完成时，会触发连接就绪事件。
++ SelectionKey.OP_READ:当关联的通道上有数据可读时，会触发读事件。
++ SelectionKey.OP_WRITE: 当关联的通道可以写入数据时，会触发写事件。
+
+
+
+**selector的SelectionKey集合**：有三个
+
++ 所有的SelectionKey集合：包含所有注册在该Selector上的Channel
++ 被选择的SelectionKey集合：包含所有可以通过select()方法获取的，需要进行IO处理的Channel，也就是就绪的SelectionKey集合
++ 被取消的SelectionKey集合：包含所有被取消注册关系的Channel，下次执行select方法时，这些SelectionKey会被彻底删除
+
+
+
+## 零拷贝
+
+计算机执行 IO 操作时，CPU减少将数据从一个存储区域复制到另一个存储区域的操作。【并不是真正意义上的完全不存在拷贝操作】
+
+在传统IO模型当中，当要读取数据时会先发起系统调用read，随即切换到内核态，切换后内核负责进行数据的读取，然后将数据返回给应用程序。要写数据时也是同理。每次读过程或者写过程**各会涉及两次数据拷贝**，一次是DMA拷贝，还有一次是数据在内核缓冲区（或者socket缓冲区）以及用户缓冲区间的拷贝。除此之外还会涉及两次上下文切换。这个过程会消耗额外的CPU和内存资源。
+
+![image-20240409144027440](image/image-20240409144027440.jpg)
+
+
+
+**以下是常见的零拷贝技术**：
+
++ mmap()+write()
+
+  数据不从内核缓冲区拷贝到用户缓冲区了，所以减少了一次CPU拷贝，但是DMA拷贝和上下文切换次数不变。主要原理是将内核缓冲区的数据映射到虚拟内存中，让用户可以直接对数据进行操作
+
+![image-20240409144557021](image/image-20240409144557021.jpg)
+
+
+
++ sendFile()
+
+  用户程序调用sendFile切换到内核态执行数据的读写，在内核态完成读写后切换回用户态，并将sendFile返回给用户程序（通常是将读写了的长度返回）。
+
+![image-20240409144945686](image/image-20240409144945686.jpg)
 
 # 特殊文本文件和日志技术
 
@@ -2771,7 +2906,7 @@ EXtensible Markup Language。在java编程过程中可以用Dom4j对其进行解
 
 
 
- ### Logback
+**Logback**
 
 1. 将Logback框架导入项目中 
 2. 将Logback核心配置文件logback.xml导入,核心配置文件中会声明日志文件的记录路径
@@ -3033,31 +3168,6 @@ public final void join();
 
 + 方式二：基于ExecutorService的实现类ThreadPoolExecutor创建一个线程池对象
 
-
-
-<font size=5>**基于Executors获取线程池**</font>
-
-```Java
-//底层还是基于ThreadPoolExecutor实现的
-//创建一个线程数无上限的线程池【实际上是有的，不过值很大很大】。如果线程执行完毕且空闲了60s,会回收掉线程
-public static ExecutorService newCachedThreadPool()
-
-//创建一个线程数有上限的线程池。如果提交的任务数超过上限，任务就会进入队列等候
-public static ExecutorService newFixedThreadPool(int nThreads)
-
-//创建一个只有一个线程的线程池对象，若该线程出现异常，线程池会补充一个新线程。
-public static ExecutorService newSingleThreadExecutor()
-
-//创建一个线程池，可以在给定的延迟后运行任务会定期执行任务
-public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
-```
-
-
-
-**注意事项：**在大型并发系统环境中使用Executors创建线程池的话可能会出现系统瘫痪，在这种场景下不要随便用
-
-
-
 <font size=5>**ExecutorService常用方法**</font>
 
 ```java
@@ -3075,6 +3185,30 @@ void shutdown()
 //不管任务是否执行完毕，立即关闭线程池
 List<Runnable> shutdownNow()
 ```
+
+-----------
+
+<font size=5>**基于Executors获取线程池**</font>
+
+【底层还是基于ThreadPoolExecutor实现的，只是给了默认的参数】
+
+```Java
+//创建一个线程数无上限的线程池【实际上是有的，不过值很大很大】。如果线程执行完毕且空闲了60s,会回收掉线程
+public static ExecutorService newCachedThreadPool()
+
+//创建一个线程数有上限的线程池。如果提交的任务数超过上限，任务就会进入队列等候
+public static ExecutorService newFixedThreadPool(int nThreads)
+
+//创建一个只有一个线程的线程池对象，若该线程出现异常，线程池会补充一个新线程。
+public static ExecutorService newSingleThreadExecutor()
+
+//创建一个线程池，可以在给定的延迟后运行任务会定期执行任务
+public static Scheduled ExecutorService newScheduledThreadPool(int corePoolSize)
+```
+
+
+
+**注意事项：**尽量不要用Executors去创建线程池。CachedThreadPool()创建的线程池允许创建地线程数量是Integer.MAX_VALUE【线程积压】。FixedThreadPool和SingleThreadPool创建的线程池其阻塞队列是无界的LinkedBlockingQueue【任务队列积压】。ScheduledThreadPool和SingleThreadScheduledExecutor使用的是无界的延迟阻塞队列DelayedWorkQueue【延迟任务的积压】
 
 
 
@@ -3098,6 +3232,17 @@ public ThreadPoolExecutor(
 + workQueue：线程池任务队列。必须是BlockingQueue的实现类，比如说ArrayBlockingQueue（容量固定），LinkedBlockingQueue（不指定容量的话容量就是无限的）
 + threadFactory：线程工厂
 + handler：线程池拒绝策略
+
+
+
+
+
+**阻塞队列**
+
++ LinkedBlockingQueue：一种基于链表的阻塞队列，支持无界和有界的形式，但在FixedThreadPool和SingleThreadExector中使用的是无界的。
++ SynchronousQueue：没有容量，不存储数据。CachedThreadPool中用的就是这种阻塞队列，但没有使用SynchronousQueue的阻塞操作。
++ DelayedWorkQueue：根据延迟时间长短对任务进行排序，添加元素满了会自动扩容。ScheduledThreadPool中用的就是这种。
++ ArrayBlockingQueue：基于数组实现的有界阻塞队列，用ThreadPoolExecutor创建线程池时比较推荐用这种。
 
 
 
