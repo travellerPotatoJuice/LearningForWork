@@ -2071,7 +2071,6 @@ while(it.hasNext()){
 
 
 
-
 ---------
 
 <font size=5>**HashMap**</font>
@@ -2094,7 +2093,9 @@ public class HashMap<K,V> extends AbstractMap<K,V>
 
 **解决哈希冲突**
 
-hashMap中的哈希方法实际上是对key调用Object的hashCode方法，然后再加上一个扰动。
+hashMap中的哈希方法实际上是对key调用Object的hashCode方法，然后再加上一个扰动。具体做法是将哈希值无符号右移16位，再与原值异或
+
+为什么要右移之后异或，而不是直接用原哈希值映射到哈希桶里呢？因为映射到哈希桶的过程实际上是一个按位与的过程，如果直接用原哈希值进行映射，并且恰巧哈希数组的长度比较小，而哈希值低位的变化比较小，就非常容易哈希冲突。所以在设计哈希函数的时候需要充分考虑高位和低位的影响。
 
 ```java
 //1.8的哈希方法
@@ -2108,9 +2109,17 @@ hashMap中的哈希方法实际上是对key调用Object的hashCode方法，然�
 
 ```
 
+
+
 **负载因子**：哈希表中存放的数据数量/哈希表的容量，默认为0.75f。负载因子和哈希表容量的乘积叫threshold，当哈希表中的元素数量达到threshold，就会触发一次扩容
 
+
+
+**HashMap将链表转换成红黑树 **
+
 当链表长度大于阈值（默认为8）时，会调用treeifyBin()方法，在该方法内部会先检查哈希数组的长度，如果小于MIN_TREEIFY_CAPACITY（64），则调用resize方法扩容数组。否则就将其转为红黑树。
+
+首先将链表中的元素都转化为TreeNode，然后调用treeify方法构建红黑树
 
 ```java
 final void treeifyBin(Node<K,V>[] tab, int hash) {
@@ -2134,6 +2143,51 @@ final void treeifyBin(Node<K,V>[] tab, int hash) {
         }
     }
 ```
+
+
+
+**HashMap扩容机制：**
+
+扩容的时机：
+
+1. hashmap中的节点个数超过了数组长度*loadFactor会触发扩容。
+2. hashMap的链表长度超过了8，并且数组长度小于64，会触发扩容。
+
+由于hashMap每次扩容都是将容量变为两倍，再加上每次取模运算都是和mask按位与，扩容后mask和原mask的区别是在原mask之前增加了一个1。这也就意味着hash值和mask按位与的时候要多考虑一位，如果hash值在新增位上的值为0，则不移动位置，如果值为1，则位置变为原位置+原数组长度
+
+扩容之后，相当于对哈希值的考虑多了一位，例如哈希值1101和哈希值0101，在数组长度为8的情况下会被映射到一个桶里（101），但是扩容之后就会被映射到不同的桶里（1101和0101），这样就降低了在链表上进行链式查询的次数。所以在hashMap的链表长度超过8后优先会考虑扩容，而不是立刻转化成红黑树。
+
+ 
+
+**HashMap中有没有设计缩容机制？**
+
+chy的回答是：
+
+没有。和ArrayList比较。ArrayList之所以有缩容机制，是因为元素是按序存储的，可以确保最后一个元素之后的空间没有元素存在，缩容时只需要创建新数组，然后拷贝就可以了。HashMap如果要实现缩容，首先需要调整数组长度，然后计算每个元素映射到哈希桶里的位置，如果冲突比较大还要考虑创建链表甚至红黑树，整个rehash的过程非常复杂，为了节省一点空间去进行这么复杂的操作得不偿失。
+
+
+
+**HashMap的get操作：**
+
+根据提供的key值计算哈希值，在hash值映射到的位置查看是否存在元素，如果只存在一个元素就比对完key直接返回，否则就判断节点类型，根据类型调用相应数据结构的方法进行查找。 
+
+
+
+**HashMap的remove操作**
+
+根据提供的key值计算hash值，在hash值映射到的位置查看是否存在元素，如果只存在一个元素就比对完key直接删除，如果存在多个元素就判断节点类型（Node还是TreeNode），根据节点类型寻找对应的key值，找到了就根据节点类型执行删除
+
+----------------
+
+<font size=5>**ConcurrentMap**</font>
+
+```java
+public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>    implements ConcurrentMap<K,V>, Serializable {
+    
+}
+```
+
+
 
 
 
@@ -3664,3 +3718,39 @@ public boolean isAnnotationPresent(Class<Annotation> annotation)
 
 
 ## 动态代理
+
+
+
+
+
+# 并发编程
+
+## synchronized
+
+synchronized是 Java 中的一个关键字，被它修饰的方法或者代码块在任意时刻只能有一个线程执行。它的使用方式主要有3种：
+
+1. 修饰实例方法：获取当前实例对象的锁
+2. 修饰静态方法：获取当前类对象的锁
+3. 修饰代码块：获取指定对象的锁。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##ReentrantLock
