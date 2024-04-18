@@ -2177,18 +2177,6 @@ chy的回答是：
 
 根据提供的key值计算hash值，在hash值映射到的位置查看是否存在元素，如果只存在一个元素就比对完key直接删除，如果存在多个元素就判断节点类型（Node还是TreeNode），根据节点类型寻找对应的key值，找到了就根据节点类型执行删除
 
-----------------
-
-<font size=5>**ConcurrentMap**</font>
-
-```java
-public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>    implements ConcurrentMap<K,V>, Serializable {
-    
-}
-```
-
-
-
 
 
 # 集合框架（二）
@@ -3725,6 +3713,14 @@ public boolean isAnnotationPresent(Class<Annotation> annotation)
 
 # 并发编程
 
+**Java是如何实现线程安全的？**
+
+关键字层面有synchronized，volatile关键字。接口层面有Java.util.concurrent.atomic，Java.util.concurrent.locks包里的工具以及并发容器【也就是Java.util.concurrent包里的类】可以用于实现线程安全。
+
+
+
+
+
 ## synchronized
 
 synchronized是 Java 中的一个关键字，被它修饰的方法或者代码块在任意时刻只能有一个线程执行。它的使用方式主要有3种：
@@ -3791,8 +3787,6 @@ Thread0释放锁时，试图CAS，恢复信息失败，进入重量级锁解锁�
 
 
 
-
-
 **偏向锁：**
 
 偏向锁（Biased Lock）是Java中用于提高**单线程访问**同步块性能的一种锁优化机制。它的设计初衷是针对仅有一个线程访问同步块的情况，通过减少同步操作的开销来提高性能。
@@ -3805,6 +3799,149 @@ Thread0释放锁时，试图CAS，恢复信息失败，进入重量级锁解锁�
 
 
 
+## volatile
+
+在多线程并发执行的情况下，多个线程共享的成员变量被修改后，可能不能立刻被其他线程看见。
+
+这是因为不同的线程都拥有各自的工作内存，它们会将共享变量从主内存中拷贝进自己的工作内存，并在自己的工作内存上对共享变量进行操作。
+
+![image-20240418184524244](image/image-20240418184524244.jpg)
+
+
+
+想要解决这个问题有两种方案：
+
++ 使用synchronized加锁：当线程进入synchronized代码块后，会先获得锁，然后清空工作内存，从主内存中将共享变量拷贝到工作内存，执行完代码后再将值刷新回内存。
++ 使用volatile关键字修饰变量：当一个线程修改了共享变量，其他线程内部的共享变量会被更改为失效状态，其他线程只能从主内存读取新值。
+
+
+
+**volatile可以保证原子性吗？**
+
+不能。对volatile修饰的字段进行修改时包括以下步骤：将主内存中的数据读取到工作内存，对数据进行修改操作，将修改后的数据写回主内存。这个过程是不加锁的，也就意味着在线程并发的情况下，线程A修改完数据后，如果发生线程调度，由于此时线程A还没有将数值写回内存，线程B获取到的数据依然是旧数据，线程B对数据进行修改写回内存后切换到线程A，线程A再将修改写回内存，线程B修改的内容就会被覆盖。
+
+简单来说，就是volatile只能保证线程读取到的数据是线程请求获取数据的时候的最新值，但不能保证对数据操作的原子性。
+
+
+
+**volatile的使用场景？**
+
++ 触发器：一个线程修改volatile变量后其他线程都可见，所以可以用来通知其他线程开始或停止某些操作
++ 纯赋值操作：就是无需查询数据的值，只对数据进行赋值的操作。
+
+
+
+## atomic
+
+![image-20240418170440770](image/image-20240418170440770.jpg)
+
+java.util.concurrent.atomic包下提供的类，它们都是具有原子/原子操作特征的类，即类中的操作都是不可中断的。即使是在多个线程一起执行的时候，一个操作一旦开始，就不会被其他线程干扰。大致可以分为四大类：
+
++ 基本类型
+  + AtomicInteger
+  + AtomicLong
+  + AtomicBoolean
++ 引用类型
+  + AtomicReference
+  + AtomicMarkableReference
+  + AtomicStampedReference
++ 数组类型
+  + AtomicIntegerArray
+  + AtomicLongArray
+  + AtomicReferenceArray
++ 对象的属性修改类型（字段更新器）
+  + AtomicIntegerFieldUpdater：原子更新整型字段
+  + AtomicLongFieldUpdater：原子更新长整型字段
+  + AtomicReferenceFieldUpdater：原子更新引用类型字段
+
+在JDK1.8之后还引入了一些原子累加器
+
++ DoubleAdder
++ LongAdder
+
+
+
+
+
+<font size=5>**基本类型**</font>
+
+以AtomicInteger为例，包括以下方法（只列举部分：
+
++ get
++ set
++ lazySet
+
++ compareAndSet
++ getAndSet
++ getAndUpdate
++ updateAndGet
++ incrementAndGet
++ decrementAndGet
+
+
+
+<font size=5>**引用类型**</font>
+
+基本类型只能对一个元素进行操作，如果需要对多个元素同时进行操作，就需要用到引用类型
+
+AtomicReference：基于CAS，存在ABA问题，无法判断共享变量是否被修改过。
+
+AtomicStampedReference：带有版本号（stamp），可以知道变量被更改过多少次（stamp是int类型的），避免ABA 问题。
+
+AtomicMarkableReference：带有标记（mark），可以知道变量是否被更改过（mark是boolean类型的）。
+
+
+
+<font size=5>**数组类型**</font>
+
+保护数组里的元素。对于数组来说，如果使用引用类型保护，那么保护的就是数组的地址而不是数字中的元素了，所以需要有数组类型。
+
+以AtomicIntegerArray为例
+
+```java
+public final int get(int i) //获取 index=i 位置元素的值
+public final int getAndSet(int i, int newValue)//返回 index=i 位置的当前的值，并将其设置为新值：newValue
+public final int getAndIncrement(int i)//获取 index=i 位置元素的值，并让该位置的元素自增
+public final int getAndDecrement(int i) //获取 index=i 位置元素的值，并让该位置的元素自减
+public final int getAndAdd(int i, int delta) //获取 index=i 位置元素的值，并加上预期的值
+boolean compareAndSet(int i, int expect, int update) //如果输入的数值等于预期值，则以原子方式将 index=i 位置的元素值设置为输入值（update）
+public final void lazySet(int i, int newValue)//最终 将index=i 位置的元素设置为newValue,使用 lazySet 设置之后可能导致其他线程在之后的一小段时间内还是可以读到旧的值。
+
+```
+
+
+
+<font size=5>**字段更新器**</font>
+
+保护对象中属性赋值的原子性。
+
+每次使用前需要先用newUpdater()方法创建一个更新器，更新的对象属性必须用volatile修饰。创建需要修改字段的对象后，只需将对象作为参数传入更新器对应的方法即可。
+
+```java
+//构造器
+public static <U> AtomicIntegerFieldUpdater<U> newUpdater(Class<U> tclass,String fieldName) {
+        return new AtomicIntegerFieldUpdaterImpl<U>(tclass, fieldName, Reflection.getCallerClass());
+}
+
+//使用
+public static void main(String[] args) {
+    AtomicIntegerFieldUpdater<User> a = AtomicIntegerFieldUpdater.newUpdater(User.class, "age");
+
+    User user = new User("Java", 22);
+    System.out.println(a.getAndIncrement(user));// 22
+    System.out.println(a.get(user));// 23
+  }
+
+```
+
+
+
+<font size=5>**原子累加器**</font>
+
+
+
+
+
 
 
 ## ReentrantLock
@@ -3814,7 +3951,7 @@ ReentrantLock 是 Java 中的一种可重入锁（Reentrant Lock）实现，它�
 + 可中断
 + 可重入
 + 可以设置超时时间
-+ 可以设置为公平锁（synchronized是公平锁）
++ 可以设置为公平锁（synchronized是非公平锁）
 + 支持多个条件变量
 
 
@@ -3827,4 +3964,53 @@ ReentrantLock 是 Java 中的一种可重入锁（Reentrant Lock）实现，它�
 
 **可重入：**
 
-## volatile
+ 可重入意味着同一个线程可以多次获得同一把锁。如果一个线程已经持有某个锁，再次请求这个锁时会立即成功
+
+
+
+**设置超时时间：**
+
+lock.tryLock()方法设置超时时间和超时时间单位，超时时间内没有获取到
+
+
+
+**公平锁：**
+
+锁的分配按照线程等待的顺序进行，即“先来先服务”。可以使用在ReentrantLock(boolean fair)构造方法中指定是否公平，默认是非公平的。公平锁一般没有必要，会降低并发度。
+
+
+
+**支持多个条件变量：**
+
+
+
+
+
+## 线程安全集合类
+
++ 遗留的安全集合
+  + HashTable
+  + Vector
++ 修饰的安全集合（使用Collections装饰的集合，本质上依然是基于synchronized实现）
+  + Synchronizedxxxxxx
++ JUC安全集合
+  + Blocking类：阻塞队列
+  + CopyOnWrite类：一般用于读多写少的场景，修改的代价比较高
+  + Concurrent类：
+
+
+
+
+
+
+
+<font size=5>**ConcurrentMap**</font>
+
+```java
+public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>    implements ConcurrentMap<K,V>, Serializable {
+    
+}
+```
+
+
+
