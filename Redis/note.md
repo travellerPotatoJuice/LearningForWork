@@ -111,7 +111,7 @@ Redis（Remote Dictionary Server），远程词典服务器，是一种NoSQL（N
 + 4.0版本之后：新增了一个新的后台线程，用来异步释放 Redis 内存，也就是 lazyfree 线程。
 + 6.0版本之后，又新增了三个线程用于分摊主线程网络IO的压力
 
-![image-20240419191413116](image-20240419191413116.jpg)
+![image-20240419191413116](image/image-20240419191413116.jpg)
 
 
 

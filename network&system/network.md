@@ -2,7 +2,35 @@
 
 ## 基本概念
 
+常见状态码：
 
++ 1xx：表示目前是协议处理的中间状态
+
++ 2xx：
+
+  + 200：OK，一切正常
+  + 204：No Content，成功，传回的响应没有body数据
+  + 206：Partial Content， 表示响应返回的body不是资源的全部，而是其中一部分
+
++ 3xx：
+
+  + 301：Moved Permanently，永久重定向
+  + 302：Found，临时重定向，资源还在但暂时要用另一个URL来访问
+  + 304：Not Modified，资源未修改，要求客户端直接使用缓存
+
++ 4xx：
+
+  + 400：Bad Request，请求的报文有错误
+  + 403：Forbidden，服务器禁止访问资源
+  + 404：Not Found，请求的资源未找到
+
++ 5xx：
+
+  + 500：Internal Server Error，服务器错误
+  + 502：Bad Gateway，服务器正常，网关错误
+  + 503：Service Unavailable，服务器正忙，暂时无法响应，请稍后重试
+
+  
 
 ## HTTP缓存技术
 
