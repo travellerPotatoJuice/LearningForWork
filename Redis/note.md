@@ -109,20 +109,58 @@ Redis（Remote Dictionary Server），远程词典服务器，是一种NoSQL（N
 
 + 2.6版本：会启动 2 个后台线程，分别处理关闭文件、AOF 刷盘这两个任务；
 + 4.0版本之后：新增了一个新的后台线程，用来异步释放 Redis 内存，也就是 lazyfree 线程。
++ 6.0版本之后，又新增了三个线程用于分摊主线程网络IO的压力
+
+![image-20240419191413116](image-20240419191413116.jpg)
+
+
+
+**初始化**
+
+调用epollcreate()创建一个epoll对象，调用socket()创建一个服务端的socket
+
+调用bind()绑定端口，调用listen()监听socket
+
+调用epoll_ctl()将该socket注册到epoll。
+
+
+
+**事件循环**
+
++ 调用处理发送队列函数，如果有任务就用write函数将缓存区里的数据发送出去。然后调用epoll_wait函数等待事件
+  + 如果是连接事件，调用accept获取已连接的socket，用epoll_ctl将其注册到epoll中，注册读事件处理函数
+  + 如果是读事件，调用read获取客户端的数据，解析命令，处理命令，将要返回的结果添加进发送队列，将执行结果写入发送
+  + 如果是写事件，调用write将缓存区里的数据发送出去，如果没有发送完就注册写事件处理函数
+
+
+
+
+
+
 
 ------------
 
 **Redis采用单线程为什么还那么快**：
 
-+ **大部分操作都在内存中完成**。基于内存的读写本来就很快，所以Redis的性能瓶颈主要是在于网络延迟而不是CPU，使用多线程不会带来巨大的性能提升
-+ **单线程可以有效避免多线程带来的问题**。使用多线程会导致比较多的**上下文切换**，从而带来大量开销。同时多线程还会面临**线程安全**问题，就需要引入锁等安全机制，实现复杂度升高，性能也受影响
 + **采用了IO多路复用**。允许内核中同时存在多个监听 Socket 和已连接 Socket。内核会一直监听这些 Socket 上的连接请求或数据请求。一旦有请求到达，就会交给 Redis 线程处理，这就实现了一个 Redis 线程处理多个 IO 流的效果，减少了阻塞带来的等待时间。
+
++ **大部分操作都在内存中完成**。基于内存的读写本来就很快，所以Redis的性能瓶颈主要是在于网络延迟而不是CPU，使用多线程不会带来巨大的性能提升
+
++ **单线程可以有效避免多线程带来的问题**。使用多线程会导致比较多的**上下文切换**，从而带来大量开销。同时多线程还会面临**线程安全**问题，就需要引入锁等安全机制，实现复杂度升高，性能也受影响
+
+  
 
 -----------------
 
-**Redis为什么要引入多线程**
+**Redis6.0之前为什么使用单线程**
 
-随着网络硬件的性能提升，Redis 的性能瓶颈有时会出现在网络 I/O 的处理上。
+使用单线程可以避免多线程并发带来的问题：比如说线程切换的开销、加锁、死锁等问题。
+
+
+
+**Redis6.0之后为什么要引入多线程**
+
+Redis 的性能瓶颈有时会出现在网络 I/O 的处理上。
 
 所以为了提高网络 I/O 的并行度，Redis 6.0 对于网络 I/O 采用多线程来处理。**但是对于命令的执行，Redis 仍然使用单线程来处理**
 
@@ -488,6 +526,81 @@ Hash结构需要实现键值存储，根据键来获取值，并且键必须唯�
 + 跳表从**内存上**看灵活一点。平衡树每个节点包含 2 个指针（分别指向左右子树），而跳表每个节点包含的指针数目平均为 1/(1-p)，具体取决于参数 p 的大小。如果像 Redis里的实现一样，取 p=1/4，那么平均每个节点包含 1.33 个指针，比平衡树更有优势。
 + 在做**范围查找**的时候，跳表比平衡树操作要简单。在平衡树上找到指定范围的最小值后还需要进行中序遍历继续查找其他值（除非像b+树一样做了特殊改造），而跳表上就不需要。
 + 从**算法实现难度**上来比较，跳表比平衡树要简单得多。发生节点的删除或者操作时，平衡树可能会出现调整，逻辑复杂。跳表只需要修改几个指针就可以。
+
+
+
+## BitMap
+
+底层是String类型
+
+常见的操作有：
+
++ setbit offset value
++ getbit key offset
++ bitcount key start end
++ bitop [operations] [result] [key1] ... [keyn]  【对key1...keyn进行operation操作，结果存到result里】
++ bitpos [key] [value]   【返回第一个出现value的位置】
+
+offset表示偏移量，value只能为0或者1，bitcount用于统计值为1的个数。
+
+在bitMap和bitMap之间可以进行灵活的位运算，在统计状态的交并集时比较有优势。
+
+
+
+## HyperLogLog
+
+主要用于计算基数，也就是一个集合中不重复的元素个数。HyperLogLog的统计是基于概率完成的，不是非常准确。
+
+
+
+全部操作就三个：
+
++ pfadd key element [element...]
++ pfcount key [key ...]
++ pfmerge destkey sourcekey [sourcekey]
+
+
+
+## GEO
+
+底层基于Zset（Sorted Set）实现，
+
+常见的操作有：
+
++ geoadd key longitude latitude member [longitude latitude member]
++ geopos key member [member ...]
++ geodist key member1 member2 [m|km|ft|mi]
++ georadius key longitude latitude radis m|km|ft|mi [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count] [ASC|DESC] [STORE key] [STOREDIST key]
++ georadiusbymember key member radius m|km|ft|mi [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count] [ASC|DESC] [STORE key] [STOREDIST key]
+
+
+
+## Stream
+
+用于完美地实现消息队列，它支持消息的持久化、支持自动生成全局唯一 ID、支持 ack 确认消息的模式、支持消费组模式等，让消息队列更加的稳定和可靠。
+
+通过xadd向队列中添加消息，xread从队列中读取消息（支持设置阻塞时间）
+
+和list相比特有的功能：
+
++ 用xgroup创建消费组，创建完成后可以用xreadgroup命令让消费组里的消费者都读取消息。消息队列中的消息只能被同一消费组里的消费者消费一次，但可以被不同消费组的消费者读取
++ stream会自动使用pending list留存消费组里每个消费者读取的消息，直到消费者使用xack通知stream消息已经处理完成。所以即使消费者执行到一半突然掉线，也依然可以用xpending命令查看已读取但未确认的消息
+
+
+
+**Stream和专业的消息队列相比有哪些缺陷？**
+
++ Redis Stream消息会丢失
+  + Redis生产者不会丢失信息
+  + Redis消费者不会丢失信息（通过pending list实现）
+  + 但是Redis存储消息的中间件会丢失消息（AOF刷盘是异步的，主从复制也是异步的，消息积压后被后台线程清理）
+
++ Redis会出现消息积压
+  + 由于Redis是基于内存实现的，当Stream过长的时候，旧消息可能会被清理，从而导致消息的丢失。但是RabbitMQ，Kafka等专业的消息队列会将消息存储在磁盘上，不会丢失消息。
+
+
+
+总的来说，如果业务比较简单，对数据丢失不敏感，消息积压的概率比较小的情况下，将Redis当作队列是可以的。但是一旦业务并发量比较高，对数据丢失的敏感度比较高，旧不建议使用Redis作为消息队列了。
 
 
 
