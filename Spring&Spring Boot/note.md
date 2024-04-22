@@ -19,7 +19,7 @@
 
 
 
-## IoC&DI
+## IoC&DI&AOP
 
 **IoC（Inversion of Control）**
 
@@ -50,7 +50,11 @@
 
 依赖注入。组件不会直接依赖于其他组件的具体实现，而是通过外部注入依赖来获取所需的其他组件或服务。
 
-AOP：Aspect Oriented Programming。面向切面编程。功能的横向抽取
+
+
+**AOP（Aspect oriented programming）**
+
+Aspect Oriented Programming。面向切面编程。
 
 
 
@@ -464,8 +468,8 @@ ApplicationContext ctx = new AnnotationConfigApplicationContext(配置类名.cla
 
 AOP：Aspect Oriented Programming，面向切面编程，是一种满足**无侵入式编程**理念的一种编程范式。它可以在**不影响原始设计**的基础上对其进行**功能增强**。
 
-+ 连接点：能够被拦截并执行切面逻辑的具体位置
-+ 切入点：指定连接点的表达式
++ 连接点（Join Point）：能够被拦截并执行切面逻辑的具体位置
++ 切入点（PointCut）：指定连接点的表达式
 + 通知：共性功能
 + 切面：描述通知和切入点之间的关系
 
@@ -554,6 +558,38 @@ AOP：Aspect Oriented Programming，面向切面编程，是一种满足**无侵
   
   }
   ```
+
+
+
+## AOP的应用场景
+
+日志记录：自定义日志记录注解，利用 AOP，一行代码即可实现日志记录。
+
+性能统计：利用 AOP 在目标方法的执行前后统计方法的执行时间，方便优化和分析。
+
+事务管理：`@Transactional` 注解可以让 Spring 为我们进行事务管理比如回滚异常操作，免去了重复的事务管理逻辑。`@Transactional`注解就是基于 AOP 实现的。
+
+权限控制：利用 AOP 在目标方法执行前判断用户是否具备所需要的权限，如果具备，就执行目标方法，否则就不执行。例如，SpringSecurity 利用`@PreAuthorize` 注解一行代码即可自定义权限校验。
+
+接口限流：利用 AOP 在目标方法执行前通过具体的限流算法和实现对请求进行限流处理。
+
+缓存管理：利用 AOP 在目标方法执行前后进行缓存的读取和更新。
+
+
+
+## Spring AOP & AspectJ
+
+AOP是一种编程思想，Spring AOP和AspectJ是具体的实现技术
+
+Spring AOP：会用到AspectJ的注解，但是底层实现AOP的技术和AspectJ不一样。Spring AOP是基于动态代理技术的。
+
+
+
+
+
+AspectJ：在编译期间将额外需要实现的逻辑织入到字节码文件中
+
+
 
 
 
@@ -851,3 +887,13 @@ public String delete(@PathVariable Integer id){
 >>>>>>> 81b426159fda15d709c112dfa26eca553985cc1c
 
 ```
+
+
+
+
+
+# Spring Boot
+
+## 自动装配
+
+通过注解或者一些简单的配置就能在 Spring Boot 的帮助下实现某块功能。
