@@ -3992,13 +3992,17 @@ lock.tryLock()方法设置超时时间和超时时间单位，超时时间内没
 
 **为什么需要ThreadLocal**
 
-整个处理流程当中都需要使用一个变量
+为了实现变量共享。静态变量虽然是全局共享的，但是多个线程同时访问静态变量会出现并发问题。为了实现变量的共享，又为了实现线程间变量的隔离，就需要用到ThreadLocal
 
 
 
-
+**ThreadLocal是什么**
 
 每个Thread中都存在一个ThreadLocalMap，Map的key是ThreadLocal对象，Map的value为需要缓存的值。ThreadLocal可以被视为一个用于操作ThreadLocalMap的工具类
+
+
+
+**ThreadLocal导致的内存泄漏了解吗？**
 
 如果在线程池中使用ThradLocal会造成内存泄漏，因为ThreadLocal对象使用完后应该要将设置的key和value进行回收，但是线程池中的线程不会回收，所以就会造成内存泄露。解决方法是在使用了ThreadLocal对象之后，手动调用ThreadLocal的remove方法，手动清除Entry对象。
 
