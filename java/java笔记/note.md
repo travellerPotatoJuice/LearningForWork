@@ -3363,6 +3363,69 @@ public boolean isAnnotationPresent(Class<Annotation> annotation)
 
 # 并发编程
 
+## JMM
+
+Java内存模型，是Java虚拟机规范中定义的关于内存访问、可见性、原子性和顺序性的规范。它定义了线程和主内存之间的抽象关系。
+
+在Java中，每个线程都有自己的工作内存（本地内存），线程无法访问其他线程工作内存中的变量，也无法直接修改主内存中的共享变量，而是只能修改自己本地内存中的变量副本，再通过主内存实现变量的共享。
+
+其主要特性包括：
+
++ 原子性
++ 可见性：一个线程修改了共享变量的值，其他线程能够立刻看到修改后的值
++ 有序性：程序执行的顺序和代码的先后顺序一致。
+
+
+
+**happens-before规则：**
+
+它定义了一系列规则，用于约束多线程间的内存访问和操作的顺序。抛开以下happens-before规则，JMM不能保证一个线程对共享变量的写，对于其他线程对该共享变量的读可见。
+
++ 线程解锁m之前对变量的写，对接下来对m加锁的其他线程对该变量的读可见。t1对x的赋值对t2可见。synchronized会强制线程从共享内存中获取共享变量的最新值。
+
+  ```java
+  static int x
+  static Object m = new Object();
+  new Thread(()->{
+  	synchronized(m){
+  		x = 10;
+  	}
+  },"t1").start();
+  
+  new Thread(()->{
+  	synchronized(m){
+  		System.out.println(m)
+  	}
+  },"t2").start();
+  ```
+
++ 线程对volatile变量的写，对其他线程对该变量的读可见。【只能说明volatile能保证可见性，但并不说明volatile能保证原子性，只是说volatile关键字修饰的变量被修改后会被强制同步到内存中】
+
+  ```java
+  volatile static int x;
+  new Thread(()->{
+  	x = 10;
+  	
+  },"t1").start();
+  
+  new Thread(()->{
+  	System.out.println(x);
+  	
+  },"t2").start();
+  ```
+
++ 线程start前对变量的写，对该线程开始后对该变量的读可见
+
++ 线程结束时对变量的写，对其他线程得知它结束后的读可见
+
++ 线程t1打断t2前对变量的写，对其他线程得知t2被打断后对变量的读可见
+
++ 对变量默认值的写，对其他线程对该变量的读可见
+
++ 具有传递性
+
+
+
 ## 线程相关概念
 
 **进程&线程&多线程：**
@@ -4018,41 +4081,46 @@ public static void main(String[] args) {
 ReentrantLock 是 Java 中的一种可重入锁（Reentrant Lock）实现，它提供了比 synchronized 更灵活和强大的锁机制。主要包含以下特点：
 
 + 等待可中断：正在等待的线程可以选择放弃等待，改为处理其他事情。【synchronized是不可中断的】
+
 + 可以设置为公平锁【synchronized是非公平的】
+
++ 可以设置超时时间【synchronized如果获取不到锁会一直等待】
+
++ 支持多个条件变量【synchronized只支持一个wait set】
+
 + 可实现选择性通知
+
 + 可重入
-+ 可以设置超时时间
-+ 支持多个条件变量
+
+  
+
+**可重入：**
+
+可重入意味着同一个线程可以多次获得同一把锁。如果一个线程已经持有某个锁，再次请求这个锁时会立即成功
 
 
 
-**可中断：**
+**可中断：lock.lockInterrutibly()**
 
 通过lock.lockInterrutibly()方法获取锁，和lock.lock()方法的区别是，进入阻塞队列后可以被其他线程通过interrupt方法打断阻塞状态。
 
 
 
-**可重入：**
-
- 可重入意味着同一个线程可以多次获得同一把锁。如果一个线程已经持有某个锁，再次请求这个锁时会立即成功
-
-
-
-**设置超时时间：**
+**可设置超时时间：lock.tryLock()**
 
 lock.tryLock()方法设置超时时间和超时时间单位，超时时间内没有获取到
 
 
 
-**公平锁：**
+**公平锁：ReentrantLock(boolean fair)**
 
 锁的分配按照线程等待的顺序进行，即“先来先服务”。可以使用在ReentrantLock(boolean fair)构造方法中指定是否公平，默认是非公平的。公平锁一般没有必要，会降低并发度。
 
 
 
-**支持多个条件变量：**
+**多个条件变量：lock.newCondition()**
 
-
+通过lock.newCondition()方法获取条件变量condition，然后调用condition.wait()方法让线程在该等待队列中等待，用condition.signal()/condition.signalAll()唤醒该等待队列中的线程
 
 
 
