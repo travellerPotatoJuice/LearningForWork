@@ -3963,7 +3963,7 @@ Thread0进行锁重入时只需要查看Mark Word中的Thread Id是否与自身�
 
 
 
-## atomic
+## Atomic
 
 ![image-20240418170440770](image/image-20240418170440770.jpg)
 
@@ -4070,7 +4070,30 @@ public static void main(String[] args) {
 
 <font size=5>**原子累加器**</font>
 
+​                                                                                                                                                                                                                                                                                        
 
+## AQS
+
+AbstractQueueSynchronizer抽象类，它为实现同步器提供了一个框架和方式。AQS是Java并发编程中的一个重要组成部分，广泛应用于实现诸如ReentrantLock、Semaphore、CountDownLatch等同步工具类。
+
+AQS的核心思想是，如果被请求的共享资源是空闲的，那就将当前请求资源的线程设置为有效的工作线程，并将共享资源设置为锁定状态。如果被请求的共享资源被占用，那么就需要一套线程阻塞等待以及被唤醒时锁分配的机制。AQS中采用的机制是CLH锁
+
+CLH锁是一个虚拟的双向队列，是对自旋锁的一个改进。它将每个请求共享资源的线程都封装成一个Node，不同的状态进入不同的等待队列，每个Node会自旋访问前一个Node的状态，当一个Node释放锁时，只有它的后一个Node可以得到锁。CLH锁中Node的前后关系不是通过指针维护的，也就是没有显式地存储指向前驱或者后继的指针。
+
+AQS在CLH锁的基础上进行了扩展，**显式的维护前驱节点和后继节点**。
+
+在AQS中定义了两种资源共享方式：Exclusive（独占），Share（共享）。如果是独占的，就实现tryAcquire-tryRelease【ReentrantLock】；如果是共享的，就实现tryAcquireShared-tryReleaseShared。也可以都实现【ReentrantReadWriteLock】
+
+
+
+**特点：**
+
++ 用state属性表示资源的状态
+  + getstate：获取state状态
+  + setstate：设置state状态
+  + compareAndSetState：基于CAS机制设置state状态
++ 提供了FIFO的等待队列，类似于Monitor的EntryList
++ 条件变量来实现等待、唤醒机制，支持多个条件变量
 
 
 
@@ -4175,12 +4198,6 @@ ThreadLocalMap里的Entry都extends WeakReference<ThreadLocal<?>>
   + Blocking类：阻塞队列
   + CopyOnWrite类：一般用于读多写少的场景，修改的代价比较高
   + Concurrent类：
-
-
-
-
-
-
 
 <font size=5>**ConcurrentMap**</font>
 
