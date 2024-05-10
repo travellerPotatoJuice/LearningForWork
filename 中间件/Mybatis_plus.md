@@ -46,5 +46,27 @@ Mybatis通过扫描实体类，并基于反射获取实体类信息作为数据�
 
 
 
-# 条件构造器
+# 核心功能
 
+## 条件构造器
+
+在MyBatis-Plus中，Wrapper是一个用于构建SQL查询条件的接口，具有以下实现类：
+
++ QueryWrapper：用于构建查询条件
++ UpdateWrapper：用于构建更新条件
++ LambdaQueryWrapper：基于Lambda表达式构建查询条件
++ LambdaUpdateWrapper：基于Lambda表达式构建更新条件
+
+
+
+## 自定义SQL
+
+ 
+
+
+
+## Service接口
+
+在mybatis-plus框架中，Service接口为实体类提供了一系列CRUD操作的方法。
+
+自定义一个自己的接口，继承自IService<T>接口；创建一个自己的实现类，继承自UserServiceImpl<M,T>实现类
