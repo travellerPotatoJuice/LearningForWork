@@ -67,6 +67,6 @@ Mybatis通过扫描实体类，并基于反射获取实体类信息作为数据�
 
 ## Service接口
 
-在mybatis-plus框架中，Service接口为实体类提供了一系列CRUD操作的方法。
+在mybatis-plus框架中，Service接口为实体类提供了一系列CRUD操作的方法。如果遇到简单的业务功能，可以直接调用IService提供的功能，如果遇到复杂的业务功能再在自定义的Service接口中定义方法。
 
-自定义一个自己的接口，继承自IService<T>接口；创建一个自己的实现类，继承自UserServiceImpl<M,T>实现类
+实现方式：自定义一个自己的接口，继承自IService<T>接口；创建一个自己的实现类，继承自UserServiceImpl<M,T>实现类
