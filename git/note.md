@@ -136,8 +136,63 @@ options
 
    ```
    git branch -d [name]
+   git branch -D [name] //强制删除，不管有没有未合并的操作都直接删除
    ```
 
-   
 
-<font size=5>**标签操作** </font>
+
+在开发过程中，一般有如下的分支使用原则和流程：
+
++ master：生产分支。线上分支，也就是作为线上运行的应用对应的分支
++ develop：开发分支。从master中创建的分支，一般作为开发部门的主要开发分支，阶段开发完成后，需要合并到master分支上准备上线
++ feature：从develop创建的分支，一般是同期并行开发，分支上的研发任务完成后合并到develop分支
++ hotfix：从master派生的分支，一般作为线上bug修复使用，修复后需要合并到master，test，develop分支
+
+
+
+## 远程仓库
+
+1. 添加远程仓库
+
+   ```
+git remote add [remote name] [path]
+   ```
+2. 查看远程仓库
+
+```
+git remote
+```
+
+3. 推送到远程仓库
+
+   ```
+git push [-f] [--set-upstream] [remote name [local branch name]:[remote branch name]]
+   ```
+   -f：表示强制覆盖
+
+   --set-upstream：推送到远端的同时建立起与远端分支的关联关系。如果已经存在关联关系，就直接push即可
+
+4. 查看本地分支和远程分支的关联关系 
+
+   ```
+git branch -vv
+   ```
+5. 从远程仓库克隆
+
+```
+git clone [path]
+```
+
+6. 从远程仓库抓取和推送。
+
+   ```
+git fetch [remote name][branch name]
+
+git pull [remote name][branch name]
+   ```
+git fetch：只拉取到本地，但不进行合并，需要执行git merge后才能合并。如果不指定远端分支名称，则抓取所有分支。
+
+git pull：拉取到本地之后自动进行合并，相当于fetch+merge。如果不指定远端分支名称，则抓取所有分支并更新当前分支。
+
+
+
