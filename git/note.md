@@ -157,11 +157,12 @@ options
    ```
 git remote add [remote name] [path]
    ```
+   
 2. 查看远程仓库
 
-```
-git remote
-```
+   ```
+   git remote
+   ```
 
 3. 推送到远程仓库
 
@@ -177,22 +178,24 @@ git push [-f] [--set-upstream] [remote name [local branch name]:[remote branch n
    ```
 git branch -vv
    ```
+   
 5. 从远程仓库克隆
 
-```
-git clone [path]
-```
+   ```
+   git clone [path]
+   ```
 
 6. 从远程仓库抓取和推送。
 
    ```
-git fetch [remote name][branch name]
-
-git pull [remote name][branch name]
+   git fetch [remote name][branch name]
+   
+   git pull [remote name][branch name]
    ```
-git fetch：只拉取到本地，但不进行合并，需要执行git merge后才能合并。如果不指定远端分支名称，则抓取所有分支。
 
-git pull：拉取到本地之后自动进行合并，相当于fetch+merge。如果不指定远端分支名称，则抓取所有分支并更新当前分支。
+   git fetch：只拉取到本地，但不进行合并，需要执行git merge后才能合并。如果不指定远端分支名称，则抓取所有分支。
+
+   git pull：拉取到本地之后自动进行合并，相当于fetch+merge。如果不指定远端分支名称，则抓取所有分支并更新当前分支。
 
 
 
