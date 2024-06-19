@@ -579,7 +579,7 @@ docker-compose --help
 
 # MQ
 
-## 基本概念
+<font size=5>**基本概念**</font>
 
 **同步调用存在的问题**
 
@@ -605,4 +605,325 @@ docker-compose --help
 + 架构复杂：业务没有明显的流程线，不好追踪管理
 
 
+
+![1716787420649](C:\Users\chygo\Desktop\LearningForWork\SpringFramework\images\1716787420649.jpg)
+
+-------------
+
+<font size=5>**RabbitMQ快速入门**</font>
+
+channel：操作MQ的工具
+
+exchange：路由信息到队列中
+
+queue：缓存消息
+
+virtual host：虚拟主机，是对queue，exchange等资源的逻辑分组
+
+Publisher将消息发送到exchange，exchange再将消息分发到对应的queue，consumer再从queue中获取消息。
+
+
+
+**常见消息模型：**
+
++ 基本消息队列（BasicQueue）：publisher将消息发送到queue，queue负责接收并缓存消息，consumer用于处理消息。消息被处理后就会被删除。
++ 工作消息队列（WorkQueue）：一个queue绑定多个消费者，消息被处理后就会被删除。
++ 发布订阅（Publish、Subscribe）：引入exchange，exchange只负责消息路由而不负责存储，路由失败则消息丢失
+  + 广播（Fanout Exchange）：将接收到的消息路由到每一个跟其绑定的queue
+  + 路由（Direct Exchange）：将接收到的消息路由到指定的queue
+  + 主题（Topic Exchange）：和DirectExchange类似，区别在于routingKey必须是多个单词的列表，并且以“ . ”分割。Queue与Exchange指定BingdingKey时可以使用通配符。
+    + \#：代指0个或多个单词
+    + *：代指一个单词
+
+
+
+## SpringAMQP
+
+**AMQP**：Advanced Message Queuing Protocol。用于应用程序或之间传递消息的开放标准
+
+**Spring AMQP**：基于AMQP协议的一套API规范，提供了一套模板来发送和接收消息。包含两部分，其中spring-amqp是基础抽象，spring-rabbit是RabbitMQ实现
+
+
+
+**快速使用**
+
+1. 引入依赖
+
+   ```xml
+   <!--AMQP依赖，包含RabbitMQ-->
+   <dependency>
+   	<groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-amqp</artifactId>
+   </dependency>
+   ```
+
+2. 修改配置信息
+
+   ```yaml
+   spring: 
+   	rabbitmq:
+   		host: 192.168.199.3
+   		port: 5672
+   		virtual-host: /
+   		username: itcast
+   		password: 123321
+   		listener:
+   			simple:
+   				prefetch: 1   #设置消息预取数量
+   				
+   ```
+
+3. 使用RabbitTemplate
+
+   ```java
+   //生产者
+   
+   @RunWith(SpringRunner.class)
+   @SpringBootTest
+   public class SpringAmqpTest {
+       @Autowired
+       private RabbitTemplate rabbitTemplate;
+   
+   
+       @Test
+       public void testSendMessage2SimpkeQueue(){
+           String queueName = "simple.queue";
+           String message = "hello spring amqp";
+           rabbitTemplate.convertAndSend(queueName,message);
+       }
+   }
+   ```
+
+   
+
+   ```java
+   //消费者
+   @Component
+   public class SpringRabbitListener {
+   
+       @RabbitListener(queues = "simple.queue")
+       public void listenSimpleQueue(String msg){
+           System.out.println("get message:"+ msg);
+       }
+   }
+   ```
+
+   
+
+**Fanout Exchange**
+
+1. 在consumer中，利用代码声明queue、exchange，并将两者绑定。也可以用@RabbitListener注解实现
+
+   ```java
+   @Configuration
+   public class FanoutConfig {
+   
+       @Bean
+       public FanoutExchange fanoutExchange(){
+           return new FanoutExchange("itcast.fanout");
+       }
+   
+       @Bean
+       public Queue fanoutQueue1(){
+           return new Queue("fanout.queue1");
+       }
+   
+       @Bean
+       public Binding fanoutBinding1(Queue fanoutQueue1, FanoutExchange fanoutExchange){
+           return BindingBuilder.bind(fanoutQueue1).to(fanoutExchange);
+       }
+   
+       @Bean
+       public Queue fanoutQueue2(){
+           return new Queue("fanout.queue2");
+       }
+   
+       @Bean
+       public Binding fanoutBinding2(Queue fanoutQueue2, FanoutExchange fanoutExchange){
+           return BindingBuilder.bind(fanoutQueue2).to(fanoutExchange);
+       }
+   }
+   ```
+
+2. 在consumer中，编写消费者方法，监听queue
+
+   ```java
+   @RabbitListener(queues = "fanout.queue1")
+   public void listenWorkQueue1(String msg){
+       System.out.println("get message from queue1:"+ msg);
+   }    
+   
+   @RabbitListener(queues = "fanout.queue2")
+   public void listenWorkQueue2(String msg){
+       System.out.println("get message from queue2:"+ msg);
+   }
+   ```
+
+3. 生产者将消息发送到exchange
+
+
+
+**Direct Exchange**
+
+1. 利用@RabbitListener注解声明Exchange，Queue，RoutingKey，监听queue
+
+   ```java
+   @RabbitListener(bindings = @QueueBinding(
+               value = @Queue(name="direct.queue1"),
+               exchange = @Exchange(name="itcast.direct" , type= ExchangeTypes.DIRECT),
+               key = {"red","blue"}
+       ))
+       public void listenDirectQueue1(String msg){
+           System.out.println("get message from queue1:"+ msg);
+       }
+   ```
+
+2. 生产者将消息发送到exchange
+
+
+
+**Topic Exchange**
+
+1. 利用@RabbitListener注解声明Exchange，Queue，RoutingKey，监听queue
+
+   ```java
+   @RabbitListener(bindings = @QueueBinding(
+               value = @Queue(name="topic.queue1"),
+               exchange = @Exchange(name="itcast.topic" , type= ExchangeTypes.TOPIC),
+               key = {"red","blue"}
+       ))
+       public void listenDirectQueue1(String msg){
+           System.out.println("get message from queue1:"+ msg);
+       }
+   ```
+
+2. 生产者将消息发送到exchange
+
+
+
+
+
+**消息转换器**
+
+Spring对消息对象的处理是由org.springframework.amqp.support.converter.MessageConverter来处理的，默认实现是SimpleMessageConverter，基于JDK的ObjectOutputStream完成序列化。
+
+推荐使用JSON的方式序列化，步骤如下：
+
+1. 引入依赖
+
+   ```xml
+   <dependency>
+   	<groupId>com.fasterxml.jackson.dataformat</groupId>
+       <artifactId>jackson-dataformat-xml</artifactId>
+       <version>2.9.10</version>
+   </dependency>
+   ```
+
+2. 在服务中声明MessageConverter
+
+   ```java
+   @Bean
+   public MessageConverter jsonMssageConverter(){
+   	return new Jackson2JsonMessageConverter();
+   }
+   ```
+
+   
+
+#  Elasticsearch
+
+ElasticsSearch是一款开源搜索引擎，可以帮助从海量数据中快速找到需要的内容是elastic stack（ELK）的一个组件，elastic stack还包括kibana、Logstash、Beats等组件。Logstash、Beats负责实现数据抓取，Elasticssearch负责存储、计算、搜索数据，Kibana负责数据可视化。
+
+
+
+## 初识ES
+
+<font size=5>**概述**</font>
+
+**正向索引和倒排索引**
+
++ 正向索引：基于文档id创建索引，查询词条时先找到文档，然后判断是否满足条件
++ 倒排索引：对文档内容分词，对词条创建索引，查询时根据词条查询文档id，再根据id获取文档
+
+
+
+**基本概念**
+
+- 文档（document）：每条数据就是一个文档
+- 词条（term）：文档按照语义分成的词语
+- 索引（Index）：相同类型的文档集合
+- 映射（mapping）：索引中文档的字段约束信息，类似于表的结构约束
+
+
+
+Mysql更擅长事务类型的操作，可以确保数据的安全和一致性。
+
+Elasticssearch更擅长海量数据的搜索、分析、计算。
+
+
+
+<font size=5>**ElasticSearch部署**</font>
+
+```shell
+# es部署
+docker run -d \
+	--name es \
+    -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+    -e "discovery.type=single-node" \
+    -v es-data:/usr/share/elasticsearch/data \
+    -v es-plugins:/usr/share/elasticsearch/plugins \
+    --privileged \
+    --network es-net \
+    -p 9200:9200 \
+    -p 9300:9300 \
+elasticsearch:7.12.1
+
+# kibana部署
+docker run -d \
+--name kibana \
+-e ELASTICSEARCH_HOSTS=http://es:9200 \
+--network=es-net \
+-p 5601:5601  \
+kibana:7.12.1
+```
+
+
+
+
+
+<font size=5>**分词器**</font>
+
+ES在倒排索引时需要对文档进行分词，但是默认的分词器对中文不是很友好。一般对中文会使用**IK分词器**。
+
+```
+POST /_analyze
+{
+  "text": "中华瑰丽秘宝敦煌石窟绘画",
+  "analyzer": "english"
+}
+```
+
++ POST：请求方式
++ / _analyze：请求路径，这里省略了网址和端口号，由kibana自动补充
++ 请求参数，json风格：
+  + analyzer：分词器类型
+  + text：要分词的内容
+
+
+
+IK分词器支持词库的扩展，和词条的禁用只需要在ik分词器目录中的config目录下的ikAnalyzer.cfg.xml文件中修改内容即可
+
+```xml
+<properties>
+    <comment>IK Analyzer 扩展配置</comment>
+    <!--扩展词典-->
+    <entry key="ext_dict">ext.dic</entry>
+    <!--停用词条-->
+    <entry key="ext_stopwords">stopword.dic</entry>
+    <!--远程扩展词典-->
+    <entry key="remote_ext_dict">words_location</entry>
+    <!--远程停用词条-->
+    <entry key="remote_ext_stopwords">words_location</entry>
+</properties>
+```
 
